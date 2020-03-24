@@ -29,9 +29,9 @@ def decorate_graph(fig, axis, name):
 
 def get_plot(client):
   fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-  ax.plot(client.interest)
-  decorate_graph(fig, ax, 'Interest over time in ' + client.name)
-  add_anomalies_as_bands(client.anomalies, interest, ax)
+  ax.plot(client.interest_by_month)
+  decorate_graph(fig, ax, client.name) #, 'Interest over time in ' + client.name)
+  add_anomalies_as_bands(client.anomalies, client.interest_by_month, ax)
   plt.show()
 
 def get_plots(anomaly_methods, lookbacks, interest, name):

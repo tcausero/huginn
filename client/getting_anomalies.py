@@ -2,7 +2,7 @@
 # FOR GETTING ANOMALIES
 
 def version_1(dx):  # constant stddev threshold across time
-  anomalies = dx\
+  anomalie = dx\
                 .where(dx.iloc[:, [0]] > dx.iloc[:, [0]].std())\
                 .dropna()
   return anomalie

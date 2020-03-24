@@ -11,7 +11,7 @@ class client:
     self.interest_by_month = self.get_interest_by_month()
   
   def get_anomalies(self, method=anom.version_2, **kwargs):
-    self.anomalies = anom.retrieve_anomalies(self.interest_by_month, 
+    self.num_anomalies, self.anomalies = anom.retrieve_anomalies(self.interest_by_month, 
                                    fun=method, **kwargs)
     return self.anomalies
   
@@ -29,7 +29,7 @@ class client:
   
   def plots(self):
     anomaly_methods = [anom.version_1, anom.version_2, anom.version_2, 
-                       anom.version_2, anom.version_2, anom.version_2]
-    lookbacks = [None, 5, 10, 25, 50, 100, 500]
+                       anom.version_2, anom.version_2, anom.version_3]
+    lookbacks = [None, 5, 10, 25, 50, 100, 10]
     anomalies = plt_a.get_plots(anomaly_methods, lookbacks, 
     							self.interest_by_month, self.name)
