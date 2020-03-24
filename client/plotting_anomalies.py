@@ -27,6 +27,13 @@ def decorate_graph(fig, axis, name):
   # plt.xticks(ticks=for_line.index, rotation=45)
   fig.autofmt_xdate()
 
+def get_plot(client):
+  fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+  ax.plot(client.interest)
+  decorate_graph(fig, ax, 'Interest over time in ' + client.name)
+  add_anomalies_as_bands(client.anomalies, interest, ax)
+  plt.show()
+
 def get_plots(anomaly_methods, lookbacks, interest, name):
   ncol = min(len(anomaly_methods), 2)
   nrow = (len(anomaly_methods) + 1) // 2

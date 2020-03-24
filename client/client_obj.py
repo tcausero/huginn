@@ -23,8 +23,11 @@ class client:
                       .groupby(['month'])\
                       .mean()
     return by_month
-  
+
   def plot(self):
+    plt_a.get_plot(self)
+  
+  def plots(self):
     anomaly_methods = [anom.version_1, anom.version_2, anom.version_2, 
                        anom.version_2, anom.version_2, anom.version_2]
     lookbacks = [None, 5, 10, 25, 50, 100, 500]
