@@ -10,10 +10,10 @@ class client:
     self.interest = interest
     self.interest_by_month = self.get_interest_by_month()
   
-  def get_anomalies(self, method, **kwargs):
-    self.anomalies = get_anomalies(self.interest_by_month, 
-                                   method, **kwargs)
-    return anomalies
+  def get_anomalies(self, method=anom.version_2, **kwargs):
+    self.anomalies = anom.retrieve_anomalies(self.interest_by_month, 
+                                   fun=method, **kwargs)
+    return self.anomalies
   
   def get_interest_by_month(self):
     by_month = self.interest[self.interest.state == 'US']\

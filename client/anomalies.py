@@ -17,7 +17,7 @@ def version_2(dx, lookback=10):
                 .dropna()
   return anomalies
 
-def get_anomalies(data, fun, **kwargs):
+def retrieve_anomalies(data, fun, **kwargs):
   # dx = np.asarray(data.Blockchain[1:]) - np.asarray(data.Blockchain[:-1])
   dx = data.diff()
   if fun == version_1:

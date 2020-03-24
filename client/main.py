@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import geopandas as gpd
 import numpy as np
+import sys
 
 import anomalies as anom
 import plotting_anomalies as plt_a
@@ -45,6 +46,7 @@ if __name__ == "__main__":
             	 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 	
 	entity = 'Point72'
+	
 	interest = get_interest_over_time([entity]) \
     	          .rename(columns={entity: 'Interest'})
     
