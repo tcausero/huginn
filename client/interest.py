@@ -24,25 +24,24 @@ def get_interest_over_time(kw_list):
 				 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 	geo_list = ['US-' + state for state in us_states]
 	geo_list.append('US')
+	
+	pytrends = TrendReq(hl='en-US', tz=360)
+	
 	first = True
 	for geo in geo_list:  # sometimes takes like 30s using all 50 states
-    	pytrends.build_payload(kw_list, cat=0, 
-        	                  timeframe='2000-12-14 2017-01-25',
-            	              geo=geo, gprop='')
-	    temp = pytrends.interest_over_time().assign(state = geo[-2:])
-    	if first == False:  # not the first iteration so join the two dfs
-      		interest = interest.append(temp)
-    	if first == True:  # on first iteration we initialize interest
-      		interest = temp
-      		first = False
+		pytrends.build_payload(kw_list, cat=0, timeframe='2000-12-14 2017-01-25', geo=geo, gprop='')
+		temp = pytrends.interest_over_time().assign(state = geo[-2:])
+		if first == False:  # not the first iteration so join the two dfs
+			interest = interest.append(temp)
+		if first == True:  # on first iteration we initialize interest
+			interest = temp
+			first = False
 	return interest
 
 ##################################
 # MAIN
 
 def get_interest(entity):
-
-	pytrends = TrendReq(hl='en-US', tz=360)
 	
 	interest = get_interest_over_time([entity]) \
     	          .rename(columns={entity: 'Interest'})
