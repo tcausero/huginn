@@ -4,7 +4,7 @@
 from matplotlib import pyplot as plt
 import pandas as pd
 
-import anomalies as anom
+import getting_anomalies as anom
 
 def add_anomalies_as_bands(anomalies, data, axis):
   if data.index.name == 'month':

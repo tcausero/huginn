@@ -9,7 +9,7 @@ import geopandas as gpd
 import numpy as np
 import sys
 
-import anomalies as anom
+import getting_anomalies as anom
 import plotting_anomalies as plt_a
 from client_obj import client as client
 
@@ -17,7 +17,7 @@ from client_obj import client as client
 # FOR GETTING THE PYTRENDS
 
 def get_interest_over_time(kw_list):
-	
+
 	pytrends = TrendReq(hl='en-US', tz=360)
 
 	us_states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']

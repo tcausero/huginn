@@ -1,7 +1,7 @@
 ##################################
 # CLIENT OBJECT
 
-import anomalies as anom
+import getting_anomalies as anom
 import plotting_anomalies as plt_a
 
 class client:
