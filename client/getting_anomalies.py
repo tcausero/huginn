@@ -17,7 +17,7 @@ def version_2(dx, lookback=10):
                 .dropna()
   return anomalie
 
-def version_3(dx, lookback):
+def version_3(dx, lookback=10):
   anomalie = dx \
                 .assign(std_dev = dx.ewm(halflife=lookback).std())# \
   anomalie = anomalie \
