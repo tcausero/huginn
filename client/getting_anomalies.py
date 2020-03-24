@@ -17,9 +17,9 @@ def version_2(dx, lookback=10):
                 .dropna()
   return anomalie
 
-def version_3(dx, lookback=10):
+def version_3(dx, lookback):
   anomalie = dx \
-                .assign(std_dev = dx.rolling(window=(lookback, 1), win_type='exponential').std())# \
+                .assign(std_dev = dx.ewm(halflife=lookback).std())# \
   anomalie = anomalie \
                 .assign(Interest = anomalie.Interest / anomalie.std_dev)# \
   anomalie = anomalie \
