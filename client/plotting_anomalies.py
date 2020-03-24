@@ -43,9 +43,9 @@ def get_plots(anomaly_methods, lookbacks, interest, name):
     axis.plot(interest)
     decorate_graph(fig, axis, name)
     if anomaly_method == anom.version_1:
-      num_anomalies, anomalies = anom.get_anomalies(interest, anomaly_method)
+      num_anomalies, anomalies = anom.retrieve_anomalies(interest, anomaly_method)
     elif anomaly_method == anom.version_2:
-      num_anomalies, anomalies = anom.get_anomalies(interest, anomaly_method, 
+      num_anomalies, anomalies = anom.retrieve_anomalies(interest, anomaly_method, 
                                                lookback=lookback)
     add_anomalies_as_bands(anomalies, interest, axis)
     print('Used {}.  Found {} anomalies.  Showing largest {}'\
