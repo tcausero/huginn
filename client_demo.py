@@ -13,7 +13,7 @@ try:
 	interest.index = interest.index.astype('datetime64[ns]')
 except:
 	print('could not find this entity in cache.  requesting pytrends...')
-	# interest = get_interest(entity)
+	interest = get_interest(entity)
 cl = client(entity, interest)
 
 cl.get_anomalies(method=anom.version_3, lookback=10)
