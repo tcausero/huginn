@@ -16,4 +16,4 @@ except:
 	interest = get_interest(entity)
 cl = client(entity, interest)
 
-cl.get_anomalies(method=anom.version_3, lookback=10)
+print(cl.get_anomalies(method=anom.version_3, lookback=10))
