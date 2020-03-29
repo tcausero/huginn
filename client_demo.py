@@ -2,8 +2,8 @@ import sys
 sys.path.append('client')
 
 from client.interest import get_interest
-from client_obj import client
-import getting_anomalies as anom
+from client.client_obj import client
+import client.getting_anomalies as anom
 import pandas as pd
 import os
 
