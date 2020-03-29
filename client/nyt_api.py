@@ -1,7 +1,10 @@
+import os
 import requests
-import json
 
 import pandas as pd
+from dotenv import load_dotenv, find_dotenv
+
+from client.exceptions import NytApiError, DotEnvError
 
 
 def _timestamp_to_string(timestamp):
@@ -15,7 +18,23 @@ def _timestamp_to_string(timestamp):
     return date_dashes
 
 
-def get_links(api_key, keyword, date, num_links=1):
+def get_api_key():
+    """Uses .env files to fetch and return the NYT API Key"""
+    dotenv_path = find_dotenv()
+
+    if not dotenv_path:
+        raise DotEnvError('No .env file found')
+
+    load_dotenv(dotenv_path)
+    api_key = os.environ.get('NYT_API_KEY')
+
+    if api_key is None:
+        raise DotEnvError('No \'NYT_API_KEY\' variable defined in .env')
+
+    return api_key
+
+
+def get_links(keyword, date, num_links=1):
     """ Returns the links to NYT in the month preceding the input date with a keyword input
 
     Note - we search before the month before the anomoly date
@@ -27,7 +46,7 @@ def get_links(api_key, keyword, date, num_links=1):
     :returns a list of links of length num_links
     """
 
-    api_key = 'jLIh1Z3tdtM8XfULe3EHGrv55fAodXCk'
+    api_key = get_api_key()
 
     end_date = _timestamp_to_string(date)
     begin_date = _timestamp_to_string(date - pd.DateOffset(months=2))
@@ -36,6 +55,14 @@ def get_links(api_key, keyword, date, num_links=1):
         .format(keyword, api_key, begin_date, end_date)
     r = requests.get(url_request)
     json_data = r.json()
-    links = [x['web_url'] for x in json_data['response']['docs']]
 
-    return links[:num_links]
+    # Look for a fault in the returned data
+    try:
+        fault = json_data['fault']['faultstring']
+        raise NytApiError(fault)
+
+    except KeyError:
+        links = [x['web_url'] for x in json_data['response']['docs']]
+        return links[:num_links]
+
+

@@ -33,28 +33,27 @@ class client:
                           .mean()
         return by_month
 
-    def get_nyt_links(self, api_key, num_links=1):
+    def get_nyt_links(self, num_links=1):
         """ Returns the links to NYT articles for anomalies attributed to the entity
 
         :argument api_key: NYT Developer API key
         :argument num_links: The number of links to return for each anomaly
 
-        :returns None, but sets self.links as a dictionary where they key is an anomaly timestamp
+        :returns self.links as a dictionary where they key is an anomaly timestamp
         and the value is a list of links of length num_links
         """
         self.check_got_anomalies()
-
-        api_key = 'jLIh1Z3tdtM8XfULe3EHGrv55fAodXCk'
 
         anomaly_dates = self.anomalies.tolist()
 
         links = []
         for date in anomaly_dates:
-            link = get_links(api_key, self.name, date)
+            link = get_links(self.name, date)
             links.append(link)
-            time.sleep(5)
+            time.sleep(7)
 
         self.links = {a_date: a_link for (a_date, a_link) in zip(anomaly_dates, links)}
+        return self.links
 
     def plot(self):
         plt_a.get_plot(self)
