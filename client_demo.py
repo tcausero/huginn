@@ -2,8 +2,8 @@ import sys
 sys.path.append('client')
 
 from client.interest import get_interest
-from client_obj import client
-import getting_anomalies as anom
+from client.client_obj import client
+import client.getting_anomalies as anom
 import pandas as pd
 import os
 
@@ -16,4 +16,4 @@ except:
 	interest = get_interest(entity)
 cl = client(entity, interest)
 
-cl.get_anomalies(method=anom.version_3, lookback=10)
+print(cl.get_anomalies(method=anom.version_3, lookback=10))

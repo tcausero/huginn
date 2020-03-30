@@ -1,0 +1,7 @@
+pandas
+matplotlib
+python-dotenv
+pytrends
+geopandas
+colour
+numpy

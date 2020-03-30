@@ -9,9 +9,9 @@ import geopandas as gpd
 import numpy as np
 import sys
 
-import anomalies as anom
-import plotting_anomalies as plt_a
-from client_obj import client as client
+import client.anomalies as anom
+import client.plotting_anomalies as plt_a
+from client.client_obj import client as client
 
 ##################################
 # FOR GETTING THE PYTRENDS
