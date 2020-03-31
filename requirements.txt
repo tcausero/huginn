@@ -5,3 +5,4 @@ pytrends
 geopandas
 colour
 numpy
+click
