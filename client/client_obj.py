@@ -33,7 +33,7 @@ class client:
                           .mean()
         return by_month
 
-    def get_nyt_links(self, num_links=1):
+    def get_nyt_links(self, num_links=1, sleeptime=1):
         """ Returns the links to NYT articles for anomalies attributed to the entity
 
         :argument api_key: NYT Developer API key
@@ -50,7 +50,7 @@ class client:
         for date in anomaly_dates:
             link = get_links(self.name, date)
             links.append(link)
-            time.sleep(7)
+            time.sleep(sleeptime)
 
         self.links = {a_date: a_link for (a_date, a_link) in zip(anomaly_dates, links)}
         return self.links

@@ -21,7 +21,7 @@ def client_point72():
 
 
 def test_get_nyt_links(client_point72):
-    client_point72.get_nyt_links()
+    client_point72.get_nyt_links(sleeptime=7)
 
     links = client_point72.links
 
