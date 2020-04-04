@@ -6,14 +6,14 @@ def get_anomalies_v1(data):
     tmp = data-mean-std 
     return tmp[tmp.iloc[:,0]>0].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
 
-def get_anomalies_v2(data, lookback): #rolling mean and rolling std
-    mean = data.rolling(lookback).mean()
-    std = data.rolling(lookback).std()
+def get_anomalies_v2(data, lookback_mean, lookback_std): #rolling mean and rolling std
+    mean = data.rolling(lookback_mean).mean()
+    std = data.rolling(lookback_std).std()
     tmp = data-mean-std
     return tmp[tmp.iloc[:,0]>0].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
 
-def get_anomalies_v3(data, halflife): #exponential moving weighted average
-    mean = data.ewm(halflife = halflife).mean()
-    std = data.ewm(halflife = halflife).std()
+def get_anomalies_v3(data, halflife_mean, halflife_std): #exponential moving weighted average
+    mean = data.ewm(halflife = halflife_mean).mean()
+    std = data.ewm(halflife = halflife_std).std()
     tmp = data-mean-std
     return tmp[tmp.iloc[:,0]>0].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
