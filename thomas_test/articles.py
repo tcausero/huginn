@@ -31,7 +31,7 @@ def get_api_key():
     return api_key
 
 def get_nyt_url(keyword, date):
-    #get NYT URL (API) from keyword and date (return by anomaly function)
+    #get NYT URL (API) from keyword and date
     begin_date = _timestamp_to_string(date - pd.DateOffset(months=1))
     end_date = _timestamp_to_string(date)
     start_url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?'

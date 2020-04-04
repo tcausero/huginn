@@ -13,8 +13,7 @@ def get_mid(keyword):
     mid = input('Enter the mid you are interested in: ')
     return mid
 
-def get_interest(keyword):
-    mid = get_mid(keyword)
+def get_interest(keyword, mid):
     pytrends.build_payload([mid], #up to 5 terms in the list
                            cat=0, #default to no category
                            timeframe='all', #Date to start from 
