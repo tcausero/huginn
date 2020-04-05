@@ -1,3 +1,6 @@
+##################################
+# FUNCTIONS TO GET ARTICLE URLs, TEXTS, TITLES
+
 import requests
 import json
 import os
@@ -31,9 +34,15 @@ def get_api_key():
     return api_key
 
 def get_nyt_url(keyword, date):
-    #get NYT URL (API) from keyword and date
+    """Construct NYT API URL
+    
+    :argument keyword: entity you are interested in
+    :argument date: pandas timestemp
+    
+    :return: corresponding url as a string
+    """
     begin_date = _timestamp_to_string(date - pd.DateOffset(months=1))
-    end_date = _timestamp_to_string(date)
+    end_date = _timestamp_to_string(date + pd.DateOffset(months=1))
     start_url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?'
     api_key = get_api_key()
     url = (start_url+"q={0}&begin_date={1}&end_date={2}&sort=relevance&api-key="+api_key).format(keyword, begin_date, end_date)
@@ -41,15 +50,14 @@ def get_nyt_url(keyword, date):
 
 def get_article_urls(keyword, date, num_links = 1):
     """ Returns the links to NYT in the month preceding the input date with a keyword input
-    Return all urls for ONE date
 
-    Note - we search before the month before the anomaly date
+    Note - we search the month before the anomaly date as well
 
     :argument keyword: str keyword to search by
     :argument date: pd.Timestamp containing the date of anomaly, to search the month before
     :argument num_links: The number of links to return. Default is one.
 
-    :returns a list of links of length num_links
+    :returns a list of links of length num_links (corresponding to articles for ONE anomaly)
     """
     
     url = get_nyt_url(keyword, date)
@@ -66,7 +74,12 @@ def get_article_urls(keyword, date, num_links = 1):
         return articles[:num_links]
 
 def get_article_text(article_url):
-    #get text of ONE article
+    """Get the text of ONE article from its url
+    
+    :argument article_url: str corresponding to the web url of the article
+    
+    :returns the content of the article as a string (or the empty string is the artile was not found)
+    """
     r = requests.get(article_url)
     soup = BeautifulSoup(r.content, features="lxml")
     try:
@@ -79,12 +92,24 @@ def get_article_text(article_url):
         return ''
 
 def get_articles_text(keyword, date, num_links = 1):
-    #get text of a list of articles (for one date)
+    """Get the text for ALL articles related to keyword at a specific date
+    
+    :argument keyword: str keyword (entity)
+    :argument date: pandas datetime (anomaly date)
+    :argument num_links: number of links (articles) to consider
+    
+    :returns a list of str, corresponding to the text of each article
+    """
     articles_url = get_article_urls(keyword, date, num_links = num_links)
     return [get_article_text(article_url) for article_url in articles_url]
 
 def get_article_title(article_url):
-    #get title of ONE article
+    """Get the title of ONE article from its url
+    
+    :argument article_url: str corresponding to the web url of the article
+    
+    :returns the title of the article as a string (or the empty string is the artile was not found)
+    """
     r = requests.get(article_url)
     soup = BeautifulSoup(r.content, features="lxml")
     try:
@@ -96,14 +121,35 @@ def get_article_title(article_url):
         return ''
 
 def get_articles_title(keyword, date, num_links = 1):
-    #get title of a list of articles (for one date)
+    """Get the title for ALL articles related to keyword at a specific date
+    
+    :argument keyword: str keyword (entity)
+    :argument date: pandas datetime (anomaly date)
+    :argument num_links: number of links (articles) to consider
+    
+    :returns a list of str, corresponding to the title of each article
+    """
     articles_url = get_article_urls(keyword, date, num_links = num_links)
     return [get_article_title(article_url) for article_url in articles_url]
 
 def get_articles_text_all_dates(keyword, dates, num_links = 1):
-    #return dictionary with text of articles associated to dates
+    """Get ALL articles text for ALL dates (anomalies) related to keyword (entity or person)
+    
+    :argument keyword: str keyword (entity or person)
+    :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
+    :argument num_links: number of links (articles) to consider
+    
+    :returns a dictionary whose keys are dates (anomalies) and values are lists containing text of articles
+    """
     return {date: get_articles_text(keyword, date, num_links) for date in dates}
 
 def get_articles_title_all_dates(keyword, dates, num_links = 1):
-    #return dictionary with title of articles associated to dates
+    """Get ALL articles title for ALL dates (anomalies) related to keyword (entity or person)
+    
+    :argument keyword: str keyword (entity or person)
+    :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
+    :argument num_links: number of links (articles) to consider
+    
+    :returns a dictionary whose keys are dates (anomalies) and values are lists containing title of articles
+    """
     return {date: get_articles_title(keyword, date, num_links) for date in dates}

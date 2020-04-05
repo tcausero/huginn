@@ -1,8 +1,15 @@
+##################################
+# PLOT DATA
+
 import matplotlib.pyplot as plt
-from anomalies import get_anomalies_v1, get_anomalies_v2, get_anomalies_v3
 import pandas as pd
 
 def plot_data(data):
+    """ Plot the data (time series)
+    
+    :argument data: dataframe with time as index and interests (volume of google searches) as first column
+    Note that the name of the first column is the name of the enity
+    """
     fig, ax = plt.subplots(1, 1, figsize=(20, 5))
     ax.plot(data, label = data.columns[0])
     ax.set_xlabel('Year')
@@ -13,6 +20,11 @@ def plot_data(data):
     plt.show()
 
 def plot_data_with_anomalies(data, anomalies):
+    """ Plot the data and add anomalies as line on the graph
+    
+    :argument data: dataframe (same as above)
+    :argument anomalies: DatetimeIndex of dates (corresponding to anomalies) - dtype=datetime64[ns]
+    """
     fig, ax = plt.subplots(1, 1, figsize=(20, 5))
     ax.plot(data, label = data.columns[0])
     ax.set_xlabel('Year')
