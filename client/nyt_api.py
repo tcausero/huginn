@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 from dotenv import load_dotenv, find_dotenv
 
-from client.exceptions import NytApiError, DotEnvError
+from client.exceptions import NytApiError, DotEnvError, ConfigNotFoundError
 
 
 def _timestamp_to_string(timestamp):
@@ -16,6 +16,22 @@ def _timestamp_to_string(timestamp):
     date_dashes = str(timestamp.date()) \
         .replace('-', '')
     return date_dashes
+
+
+def _get_sections():
+    """ Get the desired sections to search from a config file"""
+
+    try:
+        with open("client/config/sections.txt", 'r') as f:
+            sections = f.readlines()
+
+    except FileNotFoundError:
+        raise ConfigNotFoundError('Config file not found')
+
+    section_list = ["\"{}\"".format(line.strip()) for line in sections]
+    section_string = " ".join(section_list)
+
+    return section_string
 
 
 def get_api_key():
@@ -47,12 +63,13 @@ def get_links(keyword, date, num_links=1):
     """
 
     api_key = get_api_key()
+    sections = _get_sections()
 
     end_date = _timestamp_to_string(date)
     begin_date = _timestamp_to_string(date - pd.DateOffset(months=2))
 
-    url_request = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q={}&api-key={}&begin_date={}&end_date={}' \
-        .format(keyword, api_key, begin_date, end_date)
+    url_request = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?q={}&fq=section_name:({})&api-key={}&begin_date={}&end_date={}' \
+        .format(keyword, sections, api_key, begin_date, end_date)
     r = requests.get(url_request)
     json_data = r.json()
 
@@ -64,5 +81,4 @@ def get_links(keyword, date, num_links=1):
     except KeyError:
         links = [x['web_url'] for x in json_data['response']['docs']]
         return links[:num_links]
-
 

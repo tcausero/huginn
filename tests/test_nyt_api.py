@@ -14,8 +14,15 @@ def test_get_api_key():
     assert type(api_key) == str
 
 
+def test__get_sections():
+    sections = nyt._get_sections()
+
+    assert type(sections) == str
+    assert "&" not in sections
+
+
 def test_get_links():
-    date = pd.Timestamp('20200225')
+    date = pd.Timestamp('20180212')
     keyword = 'Point72'
 
     one_link_list = nyt.get_links(keyword, date, num_links=1)
