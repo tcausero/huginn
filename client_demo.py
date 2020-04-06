@@ -14,6 +14,7 @@ def client_demo(entity):
 	try:
 		interest = pd.read_csv(os.path.join('client', 'interest_cache', entity + '.csv'), index_col=0)
 		interest.index = interest.index.astype('datetime64[ns]')
+		print('Entity found in cache!')
 	except FileNotFoundError:
 		print('Could not find this entity in cache.  Requesting pytrends...')
 		interest = get_interest(entity)
