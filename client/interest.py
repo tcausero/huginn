@@ -1,46 +1,48 @@
-# !pip install git+https://github.com/GeneralMills/pytrends
-# !pip install geopandas
-# !pip install colour
+##################################
+# GET INTEREST FILE (volume of Google Searches per month)
 
 from pytrends.request import TrendReq
-from matplotlib import pyplot as plt
-import pandas as pd
-import geopandas as gpd
-import numpy as np
-import sys
 
-import client.getting_anomalies as anom
-import client.plotting_anomalies as plt_a
-from client.client_obj import client as client
+def get_pytrend():
+    """Get pytrends to scrap Google Trends data"""
+    pytrends = TrendReq(hl='en-US', #language
+                        tz=360) #timezone (US CST is 360)
+    return pytrends
 
-##################################
-# FOR GETTING THE PYTRENDS
+def get_keyword():
+    """Ask for the keyword (entity or person) you would like some information about"""
+    keyword = input('keyword: ')
+    return keyword
 
-def get_interest_over_time(kw_list):
+def get_mid(keyword):
+    """Ask for the mid your are interested in. Pytrends has a very useful method '.suggestions' which enables to 
+    specify your research (Ex: Apple could be a company or a fruit)
+    """
+    pytrends = get_pytrend()
+    print(pytrends.suggestions(keyword))
+    mid = input('Enter the mid you are interested in: ')
+    return mid
 
-	pytrends = TrendReq(hl='en-US', tz=360)
+def get_interest(keyword, mid=None):
+    """Get the time series of interest by month for the selected entity (keyword and mid)
+    
+    :argument keyword: entity name
+    :argument mid: returned by the above function to get precision
+    
+    :return: dataframe with dates as index and one column named keyword which corresponds to the interest by month
+    """
+    pytrends = get_pytrend()
 
-	us_states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-	geo_list = ['US-' + state for state in us_states]
-	geo_list.append('US')
-	
-	first = True
-	for geo in geo_list:  # sometimes takes like 30s using all 50 states
-		pytrends.build_payload(kw_list, cat=0, timeframe='2000-12-14 2017-01-25', geo=geo, gprop='')
-		temp = pytrends.interest_over_time().assign(state = geo[-2:])
-		if first == False:  # not the first iteration so join the two dfs
-			interest = interest.append(temp)
-		if first == True:  # on first iteration we initialize interest
-			interest = temp
-			first = False
-	return interest
+    if not mid:
+        mid = keyword
 
-##################################
-# MAIN
-
-def get_interest(entity):
-	
-	interest = get_interest_over_time([entity]) \
-    	          .rename(columns={entity: 'Interest'})
-	
-	return interest
+    pytrends.build_payload([mid], #up to 5 terms in the list
+                           cat=0, #default to no category
+                           timeframe='all', #Date to start from 
+                           geo='', #two letter country abreviation (default to world)
+                           gprop='news') #what property to filter to (images, news, youtube or froogle 
+                                     #(for Google Shopping results))
+    data = pytrends.interest_over_time() #two columns (mid name <-> interest and isPartial) + index = date
+    data.drop(columns = 'isPartial', inplace = True) #rermove isPartial column
+    data.columns = [keyword] #rename the column with the keyword name instead of the mid name
+    return data

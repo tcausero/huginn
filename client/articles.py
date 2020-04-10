@@ -2,12 +2,14 @@
 # FUNCTIONS TO GET ARTICLE URLs, TEXTS, TITLES
 
 import requests
-import json
 import os
+from pathlib import Path
+
 import pandas as pd
 from dotenv import load_dotenv, find_dotenv
-from exceptions import NytApiError, DotEnvError
 from bs4 import BeautifulSoup
+
+from .exceptions import NytApiError, DotEnvError, ConfigNotFoundError
 
 def _timestamp_to_string(timestamp):
     """Extracts the date from a pandas timestamp and convert to a string
@@ -17,6 +19,23 @@ def _timestamp_to_string(timestamp):
     """
     date_dashes = str(timestamp.date()).replace('-', '')
     return date_dashes
+
+def _get_sections():
+    """ Get the desired sections to search from a config file"""
+    file_path = Path(os.path.dirname(os.path.abspath(__file__))) / 'config' / 'sections.txt'
+    print(file_path)
+
+    try:
+        with open(file_path, 'r') as f:
+            sections = f.readlines()
+
+    except FileNotFoundError:
+        raise ConfigNotFoundError('Config file not found')
+
+    section_list = ["\"{}\"".format(line.strip()) for line in sections]
+    section_string = " ".join(section_list)
+
+    return section_string
 
 def get_api_key():
     """Uses .env files to fetch and return the NYT API Key"""
@@ -48,7 +67,7 @@ def get_nyt_url(keyword, date):
     url = (start_url+"q={0}&begin_date={1}&end_date={2}&sort=relevance&api-key="+api_key).format(keyword, begin_date, end_date)
     return url
 
-def get_article_urls(keyword, date, num_links = 1):
+def get_article_urls(keyword, date, num_links=1):
     """ Returns the links to NYT in the month preceding the input date with a keyword input
 
     Note - we search the month before the anomaly date as well
@@ -70,7 +89,7 @@ def get_article_urls(keyword, date, num_links = 1):
 
     except KeyError:
         #only keep article (not multimedia content)
-        articles = [news['web_url'] for news in r.json()['response']['docs'] if news['document_type']=='article']
+        articles = [news['web_url'] for news in r.json()['response']['docs'] if news['document_type'] == 'article']
         return articles[:num_links]
 
 def get_article_text(article_url):
@@ -100,7 +119,7 @@ def get_articles_text(keyword, date, num_links = 1):
     
     :returns a list of str, corresponding to the text of each article
     """
-    articles_url = get_article_urls(keyword, date, num_links = num_links)
+    articles_url = get_article_urls(keyword, date, num_links=num_links)
     return [get_article_text(article_url) for article_url in articles_url]
 
 def get_article_title(article_url):
@@ -129,7 +148,7 @@ def get_articles_title(keyword, date, num_links = 1):
     
     :returns a list of str, corresponding to the title of each article
     """
-    articles_url = get_article_urls(keyword, date, num_links = num_links)
+    articles_url = get_article_urls(keyword, date, num_links=num_links)
     return [get_article_title(article_url) for article_url in articles_url]
 
 def get_articles_text_all_dates(keyword, dates, num_links = 1):
