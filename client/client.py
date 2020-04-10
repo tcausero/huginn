@@ -1,18 +1,18 @@
 ##################################
 # CLIENT OBJECT
 
-from interest import get_interest
-from anomalies import get_anomalies_v1, get_anomalies_v2, get_anomalies_v3
-from plot_data import plot_data, plot_data_with_anomalies
-from articles import get_articles_text_all_dates, get_articles_title_all_dates
+from .interest import get_interest
+from .anomalies import get_anomalies_v1, get_anomalies_v2, get_anomalies_v3
+from .visualize import plot_data, plot_data_with_anomalies
+from .articles import get_articles_text_all_dates, get_articles_title_all_dates
 
 """
 Client object class
 Create a client object with a keyword (entity or person) and a mid (precision on the company, see interest.py for more information)
 """
 
-class client:
-    def __init__(self, key_word, mid):
+class Client:
+    def __init__(self, key_word, mid=None):
         self.name = key_word
         self.mid = mid
         self.interest = get_interest(self.name, self.mid)
@@ -67,7 +67,7 @@ class client:
         :returns a dictionnary with anomaly dates as index and list of article texts as values
         """
         self.check_got_anomalies()
-        self.text = get_articles_text_all_dates(self.name, self.anomalies, num_links = num_links)
+        self.text = get_articles_text_all_dates(self.name, self.anomalies, num_links=num_links)
         return self.text
         
     def get_title(self, num_links=1):
