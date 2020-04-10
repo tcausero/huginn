@@ -11,7 +11,7 @@ Client object class
 Create a client object with a keyword (entity or person) and a mid (precision on the company, see interest.py for more information)
 """
 
-class client:
+class Client:
     def __init__(self, key_word, mid=None):
         self.name = key_word
         self.mid = mid

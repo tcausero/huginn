@@ -3,13 +3,13 @@ import time
 import pytest
 import pandas as pd
 
-from ..client import client
+from ..client import Client
 
 @pytest.fixture
 def client_point72():
     key_word = "Point72"
 
-    cl = client(key_word)
+    cl = Client(key_word)
     cl.get_anomalies()
 
     return cl

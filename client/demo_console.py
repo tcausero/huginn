@@ -2,12 +2,12 @@
 #FOR THE DEMO FROM THE CONSOLE
 
 from .interest import get_keyword, get_mid
-from .client import client
+from .client import Client
 
 def demo_console():
     keyword = get_keyword()
     mid = get_mid(keyword)
-    cl = client(keyword, mid)
+    cl = Client(keyword, mid)
     return cl
     
 if __name__ == "__main__":
