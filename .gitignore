@@ -2,7 +2,7 @@
 .ipynb_checkpoints
 .env
 .idea/
-build/
+**/build
 client.egg-info/
 __pycache__/
 *.pyc
