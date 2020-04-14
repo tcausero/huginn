@@ -64,7 +64,7 @@ class Client:
 
         :argument num_links: number of relevant articles to consider for each anomaly date
 
-        :returns a dictionnary with anomaly dates as index and list of article texts as values
+        :returns a dictionary with anomaly dates as index and list of article texts as values
         """
         self.check_got_anomalies()
         self.text = get_articles_text_all_dates(self.name, self.anomalies, num_links=num_links)
@@ -75,7 +75,7 @@ class Client:
 
         :argument num_links: number of relevant articles to consider for each anomaly date
 
-        :returns a dictionnary with anomaly dates as index and list of article titles as values
+        :returns a dictionary with anomaly dates as index and list of article titles as values
         """
         self.check_got_anomalies()
         self.title = get_articles_title_all_dates(self.name, self.anomalies, num_links = num_links)
@@ -86,7 +86,7 @@ class Client:
 
         :argument num_links: number of relevant articles to consider for each anomaly date
 
-        :returns a dictionnary with anomaly dates as index and list of article titles as values
+        :returns a dictionary with anomaly dates as index and list of article titles as values
         """
         self.check_got_anomalies()
         self.images = get_articles_images_all_dates(self.name, self.anomalies, num_links = num_links)
