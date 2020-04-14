@@ -92,12 +92,12 @@ def get_article_urls(keyword, date, num_links=1):
         articles = [news['web_url'] for news in r.json()['response']['docs'] if news['document_type'] == 'article']
         return articles[:num_links]
 
-def get_article_text(article_url):
-    """Get the text of ONE article from its url
+def get_article_title_text(article_url):
+    """Get the title and text of ONE article from its url
     
     :argument article_url: str corresponding to the web url of the article
     
-    :returns the content of the article as a string (or the empty string is the artile was not found)
+    :returns the title and content of the article as a string (or the empty string is the article was not found)
     """
     r = requests.get(article_url)
     soup = BeautifulSoup(r.content, features="lxml")
@@ -105,70 +105,44 @@ def get_article_text(article_url):
         article_html_content = soup.find('html').find('body').find('article')
         title = article_html_content.find('header').find('h1').get_text()
         paragraphs = article_html_content.find('section', attrs = {'name':'articleBody'}).find_all('p')
-        return ' '.join([title+'.'] + [p.get_text() for p in paragraphs])
+        text = ' '.join([title+'.'] + [p.get_text() for p in paragraphs])
+        return title, text
     except:
         print('Problem with the following url:', article_url)
-        return ''
+        return '', ''
 
-def get_articles_text(keyword, date, num_links = 1):
-    """Get the text for ALL articles related to keyword at a specific date
+def get_articles_title_text(keyword, date, num_links = 1):
+    """Get the title and text for ALL articles related to keyword at a specific date
     
     :argument keyword: str keyword (entity)
     :argument date: pandas datetime (anomaly date)
     :argument num_links: number of links (articles) to consider
     
-    :returns a list of str, corresponding to the text of each article
+    :returns a dictionary (keys are titles and texts), values are a list of str, corresponding to the title or text of each article
     """
     articles_url = get_article_urls(keyword, date, num_links=num_links)
-    return [get_article_text(article_url) for article_url in articles_url]
+    results = {}
+    results['titles'], results['texts'] = [], []
+    for url in articles_url:
+        title, text = get_article_title_text(url) 
+        results['titles'].append(title)
+        results['texts'].append(text)
+    return results
 
-def get_article_title(article_url):
-    """Get the title of ONE article from its url
-    
-    :argument article_url: str corresponding to the web url of the article
-    
-    :returns the title of the article as a string (or the empty string is the artile was not found)
-    """
-    r = requests.get(article_url)
-    soup = BeautifulSoup(r.content, features="lxml")
-    try:
-        article_html_content = soup.find('html').find('body').find('article')
-        title = article_html_content.find('header').find('h1').get_text()
-        return title
-    except:
-        print('Problem with the following url:', article_url)
-        return ''
-
-def get_articles_title(keyword, date, num_links = 1):
-    """Get the title for ALL articles related to keyword at a specific date
-    
-    :argument keyword: str keyword (entity)
-    :argument date: pandas datetime (anomaly date)
-    :argument num_links: number of links (articles) to consider
-    
-    :returns a list of str, corresponding to the title of each article
-    """
-    articles_url = get_article_urls(keyword, date, num_links=num_links)
-    return [get_article_title(article_url) for article_url in articles_url]
-
-def get_articles_text_all_dates(keyword, dates, num_links = 1):
-    """Get ALL articles text for ALL dates (anomalies) related to keyword (entity or person)
+def get_articles_title_text_all_dates(keyword, dates, num_links = 1):
+    """Get ALL articles title and text for ALL dates (anomalies) related to keyword (entity or person)
     
     :argument keyword: str keyword (entity or person)
     :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
     :argument num_links: number of links (articles) to consider
     
-    :returns a dictionary whose keys are dates (anomalies) and values are lists containing text of articles
+    :returns a dictionary (keys are titles and texts) of dictionary whose keys are dates (anomalies) and values are lists containing title or text of articles
     """
-    return {date: get_articles_text(keyword, date, num_links) for date in dates}
-
-def get_articles_title_all_dates(keyword, dates, num_links = 1):
-    """Get ALL articles title for ALL dates (anomalies) related to keyword (entity or person)
-    
-    :argument keyword: str keyword (entity or person)
-    :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
-    :argument num_links: number of links (articles) to consider
-    
-    :returns a dictionary whose keys are dates (anomalies) and values are lists containing title of articles
-    """
-    return {date: get_articles_title(keyword, date, num_links) for date in dates}
+    results = {'titles':{}, 'texts':{}}
+    for date in dates:
+        temp = get_articles_title_text(keyword, date, num_links)
+        titles = temp['titles']
+        texts = temp['texts']
+        results['titles'][date] = titles
+        results['texts'][date] = texts
+    return results
