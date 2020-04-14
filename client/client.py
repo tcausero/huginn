@@ -5,6 +5,7 @@ from .interest import get_interest
 from .anomalies import get_anomalies_v1, get_anomalies_v2, get_anomalies_v3
 from .visualize import plot_data, plot_data_with_anomalies
 from .articles import get_articles_text_all_dates, get_articles_title_all_dates
+from .summarizer import get_summaries_all_articles, get_summary_of_summaries
 
 """
 Client object class
@@ -69,6 +70,20 @@ class Client:
         self.check_got_anomalies()
         self.text = get_articles_text_all_dates(self.name, self.anomalies, num_links=num_links)
         return self.text
+    
+    def get_summaries(self, num_links=1, k=1):
+        """Get summaries of article
+        :argument k: number of sentences to keep for each article
+        :returns a dictionary (dates as keys and list of summaries as values
+        """
+        self.summaries = get_summaries_all_articles(self.get_text(num_links=num_links), k=k)
+        return self.summaries
+    
+    def get_summary(self, num_links=1, k=1):
+        """Get One summary (one sentence) for each anomaly
+        """
+        self.summary = get_summary_of_summaries(self.get_summaries(num_links=num_links, k=k))
+        return self.summary
         
     def get_title(self, num_links=1):
         """Get most relevant titles about the entity during the anomaly dates

@@ -56,7 +56,7 @@ def get_summary(df,k):
     """
     return ' '.join([sentence+'.' for sentence in df.iloc[0:k]['sentences']])
 
-def summarize(article, k):
+def summarize(article, k=1):
     """Summarize AN article
     :argument article: str
     :argument k: number of sentences to return as a summary
@@ -69,3 +69,31 @@ def summarize(article, k):
     df['sentence_weight'] = df['tokenized_sentences'].map(lambda x : get_sentence_weight(x, frequency_words))
     df.sort_values(by = ['sentence_weight'], ascending = False, inplace = True)
     return get_summary(df,k)
+
+def get_summaries_all_articles(dictionary, k):
+    """Get summaries of all articles for all anomalies
+    :argument dictionary: dic (keys are dates and values are list of articles)
+    :argument k: number of sentences to keep as a summary
+    :returns dic (keys are dates, values are list of summaries)
+    """
+    dic_summaries = {}
+    for date in dictionary.keys():
+        dic_summaries[date] = []
+        for article in dictionary[date]:
+            if article != '':
+                dic_summaries[date].append(summarize(article,k))
+    return dic_summaries
+
+def get_summary_of_summaries(dic):
+    """get one sentence to summarize all articles (mos relevant)
+    :argument dic: dictionary (dates as keys, list of summaries as values)
+    :returns a dic (keys are dates, values are summaries)
+    """
+    summaries = {}
+    for date in dic.keys():
+        if len(dic[date])>0:
+            joined_summaries = ' '.join([sentence+'.' for sentence in dic[date]])
+            summaries[date] = summarize(joined_summaries, 1)
+        else:
+            summaries[date]="No summary available"
+    return summaries
