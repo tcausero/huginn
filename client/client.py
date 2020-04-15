@@ -2,7 +2,7 @@
 # CLIENT OBJECT
 
 from .interest import get_interest
-from .anomalies import get_anomalies_v1, get_anomalies_v2, get_anomalies_v3
+from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data, plot_data_with_anomalies
 from .articles import get_articles_title_text_all_dates, get_articles_images_all_dates
 from .summarizer import get_summaries_all_articles, get_summary_of_summaries
@@ -29,11 +29,11 @@ class Client:
         :returns the anomalies as a DateIndex
         """
         if method == "ewm":
-            self.anomalies = get_anomalies_v3(self.interest, **kwargs)
+            self.anomalies = ewm_std(self.interest, **kwargs)
         if method == "rolling":
-            self.anomalies = get_anomalies_v2(self.interest, **kwargs)
+            self.anomalies = rolling_std(self.interest, **kwargs)
         if method == "constant":
-            self.anomalies = get_anomalies_v1(self.interest, **kwargs)
+            self.anomalies = constant_sd(self.interest, **kwargs)
         return self.anomalies
 
     def check_got_anomalies(self):
@@ -46,11 +46,12 @@ class Client:
         """Plot only the interestt the month of the entity or person under study"""
         plot_data(self.interest)
 
-    def plot_interest_with_anomalies(self):
+    def plot_interest_with_anomalies(self, as_var=False):
         """
         Plot interest by month and the anomalies (as vertical lines)
         """
         self.check_got_anomalies()
+<<<<<<< HEAD
         plot_data_with_anomalies(self.interest, self.anomalies)
         print("""
         If you are not happy with these anomalies, you can call the method \'get_anomalies\' and
@@ -63,6 +64,13 @@ class Client:
     def get_title_text(self, num_links=1):
         """Get most relevant titles and texts about the entity during the anomaly dates
         
+=======
+        self.anomaly_plot = plot_data_with_anomalies(self.interest, self.anomalies, as_var)
+
+    def get_text(self, num_links=1):
+        """Get most relevant texts about the entity during the anomaly dates
+
+>>>>>>> added the functionality to get the anomalies plot as just a var, not actually plotted
         :argument num_links: number of relevant articles to consider for each anomaly date
         
         :returns two dictionnaries with anomaly dates as index and list of article texts or titles as values
