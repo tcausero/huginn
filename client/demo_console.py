@@ -9,6 +9,6 @@ def demo_console():
     mid = get_mid(keyword)
     cl = Client(keyword, mid)
     return cl
-    
+
 if __name__ == "__main__":
     demo_console()
