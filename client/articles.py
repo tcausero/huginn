@@ -64,7 +64,10 @@ def get_nyt_url(keyword, date):
     end_date = _timestamp_to_string(date + pd.DateOffset(months=1))
     start_url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?'
     api_key = get_api_key()
-    url = (start_url+"q={0}&begin_date={1}&end_date={2}&sort=relevance&api-key="+api_key).format(keyword, begin_date, end_date)
+    sections = _get_sections()
+
+    url = (start_url+"q={}&fq=section_name:({})&api-key={}&begin_date={}&end_date={}") \
+        .format(keyword, sections, api_key, begin_date, end_date)
     return url
 
 def get_article_urls(keyword, date, num_links=1):
