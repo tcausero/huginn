@@ -4,7 +4,7 @@
 from .interest import get_interest
 from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
-from .articles import get_article_urls, get_articles_text_all_dates, get_articles_title_all_dates, get_articles_images_all_dates
+from .articles import get_article_urls, get_articles_title_text_all_dates, get_articles_images_all_dates
 import numpy as np
 
 """
@@ -71,18 +71,7 @@ class Client:
         self.urls = {date: get_article_urls(self.name, date, num_links=num_links) for date in self.anomalies}
         return self.urls
 
-    def get_text(self, num_links=1):
-        """Get most relevant texts about the entity during the anomaly dates
-
-        :argument num_links: number of relevant articles to consider for each anomaly date
-
-        :returns a dictionary with anomaly dates as index and list of article texts as values
-        """
-        self.check_got_anomalies()
-        self.text = get_articles_text_all_dates(self.name, self.anomalies, num_links=num_links)
-        return self.text
-
-    def get_title(self, num_links=1):
+    def get_articles(self, num_links=1):
         """Get most relevant titles about the entity during the anomaly dates
 
         :argument num_links: number of relevant articles to consider for each anomaly date
@@ -90,8 +79,8 @@ class Client:
         :returns a dictionary with anomaly dates as index and list of article titles as values
         """
         self.check_got_anomalies()
-        self.title = get_articles_title_all_dates(self.name, self.anomalies, num_links=num_links)
-        return self.title
+        self.articles = get_articles_title_text_all_dates(self.name, self.anomalies, num_links=num_links)
+        return self.articles
 
     def get_image(self, num_links=1):
         """Get most relevant titles about the entity during the anomaly dates
