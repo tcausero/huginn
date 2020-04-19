@@ -2,10 +2,10 @@
 # CLIENT OBJECT
 
 from .interest import get_interest
-from .anomalies import get_anomalies_v1, get_anomalies_v2, get_anomalies_v3
-from .visualize import plot_data, plot_data_with_anomalies
-from .articles import get_articles_title_text_all_dates, get_articles_images_all_dates
-from .summarizer import get_summaries_all_articles, get_summary_of_summaries
+from .anomalies import constant_sd, rolling_std, ewm_std
+from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
+from .articles import get_article_urls, get_articles_title_text_all_dates, get_articles_images_all_dates
+import numpy as np
 
 """
 Client object class
@@ -29,11 +29,12 @@ class Client:
         :returns the anomalies as a DateIndex
         """
         if method == "ewm":
-            self.anomalies = get_anomalies_v3(self.interest, **kwargs)
+            self.anomalies = ewm_std(self.interest, **kwargs)
         if method == "rolling":
-            self.anomalies = get_anomalies_v2(self.interest, **kwargs)
+            self.anomalies = rolling_std(self.interest, **kwargs)
         if method == "constant":
-            self.anomalies = get_anomalies_v1(self.interest, **kwargs)
+            self.anomalies = constant_sd(self.interest, **kwargs)
+        self.anomalies_formatted = np.array(self.anomalies, dtype='datetime64[D]')
         return self.anomalies
 
     def check_got_anomalies(self):
@@ -42,49 +43,44 @@ class Client:
             raise AttributeError('This Client has not gotten anomalies yet. Use \'get_anomalies\' before using '
                                  'this Client')
 
-    def plot_interest(self):
+    def plot_interest(self, plotly=False):
         """Plot only the interestt the month of the entity or person under study"""
-        plot_data(self.interest)
+        if not plotly:
+            plot_data(self.interest)
+        else:
+            return plot_data_plotly(self.interest)
 
-    def plot_interest_with_anomalies(self):
+    def plot_interest_with_anomalies(self, plotly=False, as_var=False):
         """
         Plot interest by month and the anomalies (as vertical lines)
         """
         self.check_got_anomalies()
-        plot_data_with_anomalies(self.interest, self.anomalies)
-        print("""
-        If you are not happy with these anomalies, you can call the method \'get_anomalies\' and
-        specify the function to get anomalies:
-        - method = 'constant' with parameter k (set to 1 by default)
-        - method = 'rolling' with parameters lookback_mean, lookback_std and k (set to 1, 10, 1 by default)
-        - method = 'ewm' with parameters halflife_mean, halflife_std and k(set to 1,10,1 by default) [default method]
-        """)
-        
-    def get_title_text(self, num_links=1):
-        """Get most relevant titles and texts about the entity during the anomaly dates
-        
+        if not plotly:
+            self.anomaly_plot = plot_data_with_anomalies(self.interest, self.anomalies, as_var)
+        else:
+            self.anomaly_plot = plot_data_with_anomalies_plotly(self.interest, self.anomalies, as_var)
+            return self.anomaly_plot
+
+    def get_links(self, num_links=1):
+        """Get relevant urls about the entity during the anomaly dates
+
         :argument num_links: number of relevant articles to consider for each anomaly date
-        
-        :returns two dictionnaries with anomaly dates as index and list of article texts or titles as values
+
+        :returns a dictionary with anomaly dates as index and list of urls as values
+        """
+        self.urls = {date: get_article_urls(self.name, date, num_links=num_links) for date in self.anomalies}
+        return self.urls
+
+    def get_articles(self, num_links=1):
+        """Get most relevant titles about the entity during the anomaly dates
+
+        :argument num_links: number of relevant articles to consider for each anomaly date
+
+        :returns a dictionary with anomaly dates as index and list of article titles as values
         """
         self.check_got_anomalies()
-        tmp = get_articles_title_text_all_dates(self.name, self.anomalies, num_links=num_links)
-        self.title, self.text = tmp['titles'], tmp['texts']
-        return self.title, self.text
-    
-    def get_summaries(self, num_links=1, k=1):
-        """Get summaries of article
-        :argument k: number of sentences to keep for each article
-        :returns a dictionary (dates as keys and list of summaries as values)
-        """
-        titles, texts = self.get_title_text(num_links=num_links)
-        self.summaries = get_summaries_all_articles(texts, k=k)
-        return self.summaries
-    
-    def get_summary(self, num_links=1, k=1):
-        """Get One summary (one sentence) for each anomaly
-        """
-        self.summary = get_summary_of_summaries(self.get_summaries(num_links=num_links, k=k))
+        self.articles = get_articles_title_text_all_dates(self.name, self.anomalies, num_links=num_links)
+        return self.articles
 
     def get_image(self, num_links=1):
         """Get most relevant titles about the entity during the anomaly dates
@@ -94,5 +90,5 @@ class Client:
         :returns a dictionary with anomaly dates as index and list of article titles as values
         """
         self.check_got_anomalies()
-        self.images = get_articles_images_all_dates(self.name, self.anomalies, num_links = num_links)
+        self.images = get_articles_images_all_dates(self.name, self.anomalies, num_links=num_links)
         return self.images

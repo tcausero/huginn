@@ -95,9 +95,9 @@ def get_article_urls(keyword, date, num_links=1):
 
 def get_article_title_text(article_url):
     """Get the title and text of ONE article from its url
-    
+
     :argument article_url: str corresponding to the web url of the article
-    
+
     :returns the title and content of the article as a string (or the empty string is the article was not found)
     """
     r = requests.get(article_url)
@@ -114,29 +114,29 @@ def get_article_title_text(article_url):
 
 def get_articles_title_text(keyword, date, num_links = 1):
     """Get the title and text for ALL articles related to keyword at a specific date
-    
+
     :argument keyword: str keyword (entity)
     :argument date: pandas datetime (anomaly date)
     :argument num_links: number of links (articles) to consider
-    
+
     :returns a dictionary (keys are titles and texts), values are a list of str, corresponding to the title or text of each article
     """
     articles_url = get_article_urls(keyword, date, num_links=num_links)
     results = {}
     results['titles'], results['texts'] = [], []
     for url in articles_url:
-        title, text = get_article_title_text(url) 
+        title, text = get_article_title_text(url)
         results['titles'].append(title)
         results['texts'].append(text)
     return results
 
 def get_articles_title_text_all_dates(keyword, dates, num_links = 1):
     """Get ALL articles title and text for ALL dates (anomalies) related to keyword (entity or person)
-    
+
     :argument keyword: str keyword (entity or person)
     :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
     :argument num_links: number of links (articles) to consider
-    
+
     :returns a dictionary (keys are titles and texts) of dictionary whose keys are dates (anomalies) and values are lists containing title or text of articles
     """
     results = {'titles':{}, 'texts':{}}

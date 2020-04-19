@@ -18,6 +18,7 @@ setup(name='client',
             'colour',
             'numpy',
             'click',
-            'bs4'
+            'bs4',
+            'plotly'
       ],
       zip_safe=False)
