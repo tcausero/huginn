@@ -79,7 +79,6 @@ def get_article_urls(keyword, date, num_links=1):
 
     :returns a list of links of length num_links (corresponding to articles for ONE anomaly)
     """
-
     url = get_nyt_url(keyword, date)
     r = requests.get(url)
 
@@ -93,44 +92,51 @@ def get_article_urls(keyword, date, num_links=1):
         articles = [news['web_url'] for news in r.json()['response']['docs'] if news['document_type'] == 'article']
         return articles[:num_links]
 
-def get_article_title_text(article_url):
-    """Get the title and text of ONE article from its url
+def get_article_title_text_images(article_url):
+    """Get the images, title and text of ONE article from its url
 
     :argument article_url: str corresponding to the web url of the article
 
-    :returns the title and content of the article as a string (or the empty string is the article was not found)
+    :returns the images, title and content of the article as a string
     """
     r = requests.get(article_url)
     soup = BeautifulSoup(r.content, features="lxml")
     try:
+        image_links = []
+        for link in soup.find_all('img'):
+            imgSrc = link.get('src')
+            image_links.append(imgSrc)
         article_html_content = soup.find('html').find('body').find('article')
         title = article_html_content.find('header').find('h1').get_text()
         paragraphs = article_html_content.find('section', attrs = {'name':'articleBody'}).find_all('p')
         text = ' '.join([title+'.'] + [p.get_text() for p in paragraphs])
-        return title, text
+        return image_links, title, text
     except:
-        print('Problem with the following url:', article_url)
-        return '', ''
+        return None, None, None
 
-def get_articles_title_text(keyword, date, num_links = 1):
-    """Get the title and text for ALL articles related to keyword at a specific date
+def get_articles_title_text_images(keyword, date, num_links = 1):
+    """Get the images, title and text for ALL articles related to keyword at a specific date
 
     :argument keyword: str keyword (entity)
     :argument date: pandas datetime (anomaly date)
     :argument num_links: number of links (articles) to consider
 
-    :returns a dictionary (keys are titles and texts), values are a list of str, corresponding to the title or text of each article
+    :returns a dictionary (keys are images, titles and texts), values are a list of str, corresponding to the images, title or text of each article
     """
     articles_url = get_article_urls(keyword, date, num_links=num_links)
     results = {}
-    results['titles'], results['texts'] = [], []
+    results['urls'], results['titles'], results['texts'], results['images'] = articles_url, [], [], []
+    S = 0
     for url in articles_url:
-        title, text = get_article_title_text(url)
-        results['titles'].append(title)
-        results['texts'].append(text)
-    return results
+        images, title, text = get_article_title_text_images(url)
+        if images is not None:
+            S+=1
+            results['titles'].append(title)
+            results['texts'].append(text)
+            results['images'].append(images)
+    return S, results
 
-def get_articles_title_text_all_dates(keyword, dates, num_links = 1):
+def get_articles_title_text_images_all_dates(keyword, dates, num_links = 1):
     """Get ALL articles title and text for ALL dates (anomalies) related to keyword (entity or person)
 
     :argument keyword: str keyword (entity or person)
@@ -139,50 +145,18 @@ def get_articles_title_text_all_dates(keyword, dates, num_links = 1):
 
     :returns a dictionary (keys are titles and texts) of dictionary whose keys are dates (anomalies) and values are lists containing title or text of articles
     """
-    results = {'titles':{}, 'texts':{}}
+    results = {'urls': {}, 'titles':{}, 'texts':{}, 'images':{}}
+    total = 0
+    N = 0
     for date in dates:
-        temp = get_articles_title_text(keyword, date, num_links)
-        titles = temp['titles']
-        texts = temp['texts']
-        results['titles'][date] = titles
-        results['texts'][date] = texts
+        S, tmp = get_articles_title_text_images(keyword, date, num_links)
+        results['urls'][date] = tmp['urls']
+        results['titles'][date] = tmp['titles']
+        results['texts'][date] = tmp['texts']
+        results['images'][date] = tmp['images']
+        total +=S
+        N+=len(tmp['urls'])
+    print('You asked for ' + str(len(dates)*num_links) + ' articles.')
+    print(str(N) + ' articles about ' + keyword + ' were found.')
+    print(str(int(total/N*100))+ '% of found articles could have been scrapped')
     return results
-
-def get_article_images(article_url):
-    """Get the url to each image for ONE article from its url
-
-    :argument article_url: str corresponding to the web url of the article
-
-    :returns a list of links to all images in the article
-    """
-    r  = requests.get(article_url) #Download website source
-    data = r.text  #Get the website source as text
-    soup = BeautifulSoup(data, features="lxml") #Setup a "soup" which BeautifulSoup can search
-    image_links = []
-    for link in soup.find_all('img'):  #Cycle through all 'img' tags
-        imgSrc = link.get('src')   #Extract the 'src' from those tags
-        image_links.append(imgSrc)    #Append the source to 'links'
-    return image_links  #Print 'links'
-
-def get_articles_images(keyword, date, num_links=1):
-    """Get the images for ALL articles related to keyword at a specific date
-
-    :argument keyword: str keyword (entity)
-    :argument date: pandas datetime (anomaly date)
-    :argument num_links: number of links (articles) to consider
-
-    :returns a list of lists, each nested list corresponding to all images in the respective article
-    """
-    articles_url = get_article_urls(keyword, date, num_links=num_links)
-    return [get_article_images(article_url) for article_url in articles_url]
-
-def get_articles_images_all_dates(keyword, dates, num_links=1):
-    """Get ALL article images for ALL dates (anomalies) related to keyword (entity or person)
-
-    :argument keyword: str keyword (entity or person)
-    :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
-    :argument num_links: number of links (articles) to consider
-
-    :returns a dictionary whose keys are dates (anomalies) and values are list of lists containing links to images in the article
-    """
-    return {date: get_articles_images(keyword, date, num_links) for date in dates}

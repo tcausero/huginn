@@ -4,7 +4,7 @@
 from .interest import get_interest
 from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
-from .articles import get_article_urls, get_articles_title_text_all_dates, get_articles_images_all_dates
+from .articles import get_articles_title_text_images_all_dates
 from ._lda import tokenize, get_lemma, prepare_text_for_lda, retrieve_tokens, set_dict, set_corpus, run_lda
 import numpy as np
 
@@ -68,38 +68,14 @@ class Client:
         else:
             self.anomaly_plot = plot_data_with_anomalies_plotly(self.interest, self.anomalies, as_var)
             return self.anomaly_plot
-
-    def get_links(self, num_links=1):
-        """Get relevant urls about the entity during the anomaly dates
-
-        :argument num_links: number of relevant articles to consider for each anomaly date
-
-        :returns a dictionary with anomaly dates as index and list of urls as values
-        """
-        self.urls = {date: get_article_urls(self.name, date, num_links=num_links) for date in self.anomalies}
-        return self.urls
-
-    def get_articles(self, num_links=1):
-        """Get most relevant titles about the entity during the anomaly dates
-
-        :argument num_links: number of relevant articles to consider for each anomaly date
-
-        :returns a dictionary with anomaly dates as index and list of article titles as values
-        """
+    
+    def get_info(self, num_links):
         self.check_got_anomalies()
-        self.articles = get_articles_title_text_all_dates(self.name, self.anomalies, num_links=num_links)
-        return self.articles
-
-    def get_image(self, num_links=1):
-        """Get most relevant titles about the entity during the anomaly dates
-
-        :argument num_links: number of relevant articles to consider for each anomaly date
-
-        :returns a dictionary with anomaly dates as index and list of article titles as values
-        """
-        self.check_got_anomalies()
-        self.images = get_articles_images_all_dates(self.name, self.anomalies, num_links=num_links)
-        return self.images
+        tmp = get_articles_title_text_images_all_dates(self.name, self.anomalies, num_links)
+        self.urls = tmp['urls']
+        self.titles = tmp['titles']
+        self.articles = tmp['texts']
+        self.images = tmp['images']
 
     def model_lda(self, viz=True):
         """Must have run get_anomalies() and get_title_text() to have requisite articles in session

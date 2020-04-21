@@ -36,10 +36,8 @@ def get_interest(keyword, mid=None):
     try:
         interest = pd.read_csv(os.path.join(os.path.dirname(__file__), 'interest_cache/' + keyword + '.csv'), index_col=0)
         interest.index = pd.to_datetime(interest.index)
-        print('found in cache')
         return interest
     except:
-        print('requesting pytrends')
         pytrends = get_pytrend()
 
         if not mid:
