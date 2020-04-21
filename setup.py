@@ -19,6 +19,11 @@ setup(name='client',
             'numpy',
             'click',
             'bs4',
-            'plotly'
+            'plotly',
+	    'pyLDAvis',
+	    'gensim',
+	    'pickle',
+	    'spacy',
+	    'nltk'
       ],
       zip_safe=False)

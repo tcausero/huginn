@@ -5,6 +5,7 @@ from .interest import get_interest
 from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
 from .articles import get_article_urls, get_articles_title_text_all_dates, get_articles_images_all_dates
+from ._lda import tokenize, get_lemma, prepare_text_for_lda, retrieve_tokens, set_dict, set_corpus, run_lda
 import numpy as np
 
 """
@@ -41,6 +42,13 @@ class Client:
         """Method to check if get_anomalies has been called, used primarily as a check in later functions"""
         if not hasattr(self, 'anomalies'):
             raise AttributeError('This Client has not gotten anomalies yet. Use \'get_anomalies\' before using '
+                                 'this Client')
+
+
+    def check_got_articles(self):
+        """Method to check if get_articles() has been called, used primarily as a check in later functions"""
+        if not hasattr(self, 'articles'):
+            raise AttributeError('This Client has not gotten article texts yet. Use \'get_articles\' before using '
                                  'this Client')
 
     def plot_interest(self, plotly=False):
@@ -92,3 +100,17 @@ class Client:
         self.check_got_anomalies()
         self.images = get_articles_images_all_dates(self.name, self.anomalies, num_links=num_links)
         return self.images
+
+    def model_lda(self, viz=True):
+        """Must have run get_anomalies() and get_title_text() to have requisite articles in session
+           prior to running LDA on the client
+        """
+
+        self.check_got_anomalies()
+        self.check_got_articles()
+        article_list = [item for sublist in list(self.articles['texts'].values()) for item in sublist if len(item) > 10]
+        self.text_data = retrieve_tokens(article_list)
+        self.dictionary = set_dict(self.text_data)
+        self.corpus = set_corpus(self.text_data, self.dictionary)
+        if viz == True:
+            run_lda(self.corpus, self.dictionary)
