@@ -22,6 +22,7 @@ setup(name='huginn',
             'plotly',
             'pyLDAvis',
             'gensim',
+            'tokenizer',
             'spacy',
             'nltk'
             ],
