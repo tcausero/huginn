@@ -3,7 +3,7 @@ import time
 import pytest
 import pandas as pd
 
-from ..huginn import Huginn
+from huginn.huginn import Huginn
 
 @pytest.fixture
 def point72():

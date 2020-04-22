@@ -42,8 +42,8 @@ class Huginn:
     def check_got_articles(self):
         """Method to check if get_articles() has been called, used primarily as a check in later functions"""
         if not hasattr(self, 'articles'):
-            raise AttributeError('This Huginn has not gotten article texts yet. Use \'get_articles\' before using '
-                                 'this Huginn')
+            raise AttributeError('Huginn has not gotten article texts yet. Use \'get_articles\' before using '
+                                 'Huginn')
 
     def plot_interest(self, plotly=False):
         """Plot only the interestt the month of the entity or person under study"""
