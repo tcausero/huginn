@@ -3,23 +3,23 @@ import time
 import pytest
 import pandas as pd
 
-from ..client import Client
+from huginn.huginn import Huginn
 
 @pytest.fixture
-def client_point72():
+def point72():
     key_word = "Point72"
 
-    cl = Client(key_word)
+    cl = Huginn(key_word)
     cl.get_anomalies()
 
     return cl
 
 
-def test_get_text(client_point72):
+def test_get_text(point72):
     time.sleep(45)
-    client_point72.get_text()
+    point72.get_text()
 
-    text = client_point72.text
+    text = point72.text
 
     assert type(text) == dict
 

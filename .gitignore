@@ -4,6 +4,6 @@
 .idea/
 **/build
 **/dist
-client.egg-info/
+*.egg-info/
 __pycache__/
 *.pyc

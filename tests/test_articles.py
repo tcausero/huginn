@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .. import articles
+from huginn import articles
 
 
 def test__timestamp_to_string():

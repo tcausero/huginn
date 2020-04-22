@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
-setup(name='client',
+setup(name='huginn',
       version='0.1',
       description='Know Your Client Tools From News Sources',
-      url='http://github.com/tcausero/Capstone_KYC',
+      url='http://github.com/tcausero/huginn',
       author='Jesse Cahill, Thomas Causero, James DeAntonis, Ryan McNally',
       author_email='jcahill225@gmail.com, tc3030@columbia.edu, jad2295@columbia.edu, rom2109@columbia.edu',
       license='MIT',
@@ -20,10 +20,10 @@ setup(name='client',
             'click',
             'bs4',
             'plotly',
-	    'pyLDAvis',
-	    'gensim',
-	    'pickle',
-	    'spacy',
-	    'nltk'
-      ],
+            'pyLDAvis',
+            'gensim',
+            'tokenizer',
+            'spacy',
+            'nltk'
+            ],
       zip_safe=False)
