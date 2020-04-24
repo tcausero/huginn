@@ -6,7 +6,6 @@ from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, pl
 from .articles import get_articles_title_text_images_all_dates
 from ._lda import tokenize, get_lemma, prepare_text_for_lda, retrieve_tokens, set_dict, set_corpus, run_lda
 from ._gpt2 import run_gpt2
-from ._summarizer import run_summary
 
 class Huginn:
     def __init__(self, key_word, mid=None):
@@ -97,10 +96,3 @@ class Huginn:
         self.check_got_articles()
         self.check_got_ldamodel()
         self.gpt2_output = run_gpt2(self.gpt2_input)
-
-    def get_summary(self):
-        self.check_got_anomalies()
-        self.check_got_articles()
-        self.check_got_ldamodel()
-        self.summary = run_summary(self.gpt2_input)
-

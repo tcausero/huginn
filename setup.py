@@ -29,6 +29,8 @@ setup(name='huginn',
             'gensim',
             'tokenizer',
             'spacy',
-            'nltk'
-            ],
+            'nltk',
+            'torch',
+            'transformers'           
+ ],
       zip_safe=False)
