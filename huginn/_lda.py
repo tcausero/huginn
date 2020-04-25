@@ -9,7 +9,7 @@ import nltk
 from nltk.corpus import wordnet as wn
 from nltk.stem.wordnet import WordNetLemmatizer
 import pandas as pd
-
+import numpy as np
 
 def tokenize(text):
     parser = English()
@@ -66,8 +66,22 @@ def set_corpus(text_data, dictionary):
 
 #NUM_TOPICS = 5 #self.num_topics # arbitrary
 
-def run_lda(corpus, dictionary):
+def run_lda(corpus, dictionary, ds):
     ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics = 5, id2word=dictionary, passes=15)
+    dom_topic = np.argmax([sum([ldamodel.show_topic(i)[x][1] for x in range(len(ldamodel.show_topic(i)))]) for i in range(5)])
+    top5_prevalent_words = [i[0] for i in ldamodel.show_topic(dom_topic)[:5]]
+    relevant_sentences = []
+    for article in ds:
+        split_sentences = article.lower().split('.')
+        for sentence in split_sentences:
+            words_in_sentence = sentence.split(' ')
+            for word in words_in_sentence:
+                if word in top5_prevalent_words:
+                    relevant_sentences.append(sentence+'.')
+                    break
+    gpt2_input = ' '.join(relevant_sentences)
+    return ldamodel, dom_topic, gpt2_input
 
+def show_lda(ldamodel):
     lda_display = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary, sort_topics=False)
     pyLDAvis.show(lda_display)
