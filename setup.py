@@ -18,7 +18,6 @@ setup(name='huginn',
       install_requires=[
             'pandas',
             'matplotlib',
-            'python-dotenv',
             'pytrends',
             'geopandas',
             'colour',
