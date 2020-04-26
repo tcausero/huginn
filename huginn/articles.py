@@ -22,7 +22,7 @@ def _timestamp_to_string(timestamp):
 
 def _get_sections():
     """ Get the desired sections to search from a config file"""
-    file_path = Path(os.path.dirname(os.path.abspath(__file__))).Parent / 'config' / 'sections.txt'
+    file_path = Path(os.path.dirname(os.path.abspath(__file__))).parent / 'config' / 'sections.txt'
     try:
         with open(file_path, 'r') as f:
             sections = f.readlines()
@@ -37,16 +37,10 @@ def _get_sections():
 
 def get_api_key():
     """Uses .env files to fetch and return the NYT API Key"""
-    dotenv_path = find_dotenv()
-
-    if not dotenv_path:
-        raise DotEnvError('No .env file found')
-
-    load_dotenv(dotenv_path)
     api_key = os.environ.get('NYT_API_KEY')
 
     if api_key is None:
-        raise DotEnvError('No \'NYT_API_KEY\' variable defined in .env')
+        raise DotEnvError('No \'NYT_API_KEY\' system environment variable defined')
 
     return api_key
 
