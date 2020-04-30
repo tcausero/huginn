@@ -4,9 +4,8 @@ from .interest import get_interest, get_mid
 from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
 from .articles import get_articles_title_text_images_all_dates
-from ._lda import tokenize, get_lemma, prepare_text_for_lda, retrieve_tokens, set_dict, set_corpus, run_lda
-from ._gpt2 import run_gpt2
-from ._summarizer import run_summary
+from .LDA import run_lda
+from .summarizer import run_gpt2, run_summary
 
 class Huginn:
     def __init__(self, keyword):
@@ -81,28 +80,23 @@ class Huginn:
         self.articles = tmp['texts']
         self.images = tmp['images']
 
-    def model_lda(self, viz=True):
+    def model_lda(self, n_components = 2, n_words=10):
         """Must have run get_anomalies() and get_title_text() to have requisite articles in session
            prior to running LDA on the object
         """
-
         self.check_got_anomalies()
         self.check_got_articles()
-        article_list = [item for sublist in list(self.articles.values()) for item in sublist if len(item) > 10]
-        self.text_data = retrieve_tokens(article_list)
-        self.dictionary = set_dict(self.text_data)
-        self.corpus = set_corpus(self.text_data, self.dictionary)
-        self.ldamodel, self.dom_topic, self.gpt2_input = run_lda(self.corpus, self.dictionary, article_list)
+        self.lda_output = run_lda(self.articles, n_components=n_components, n_words = n_words)
 
-    def gpt2(self):
-        self.check_got_anomalies()
-        self.check_got_articles()
-        self.check_got_ldamodel()
-        self.gpt2_output = run_gpt2(self.gpt2_input)
+    #def gpt2(self):
+    #    self.check_got_anomalies()
+    #    self.check_got_articles()
+    #    self.check_got_ldamodel()
+    #    self.gpt2_output = run_gpt2(self.gpt2_input)
 
-    def get_summary(self):
-        self.check_got_anomalies()
-        self.check_got_articles()
-        self.check_got_ldamodel()
-        self.summary = run_summary(self.gpt2_input)
+    #def get_summary(self):
+    #    self.check_got_anomalies()
+    #    self.check_got_articles()
+    #    self.check_got_ldamodel()
+    #    self.summary = run_summary(self.gpt2_input)
 
