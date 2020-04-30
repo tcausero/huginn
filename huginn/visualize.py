@@ -36,27 +36,11 @@ def plot_data(data):
     plt.legend()
     plt.show()
 
-def plot_data_with_anomalies_plotly(data, anomalies, as_var=False):
+def plot_data_with_anomalies_plotly(data, anomalies):
     fig = px.line(data, x=data.index, y=data.columns[0])
 
     shapes = []
     for anomaly in anomalies:
-        # shapes.append({  # Unbounded line at x = 4
-        #         'type': 'line',
-        #         # x-reference is assigned to the x-values
-        #         'xref': 'x',
-        #         # y-reference is assigned to the plot paper [0,1]
-        #         'yref': 'paper',
-        #         'x0': anomaly,
-        #         'y0': 0,
-        #         'x1': anomaly,
-        #         'y1': 1,
-        #         'line': {
-        #             'color': 'rgb(55, 128, 191)',
-        #             'width': 3,
-        #         },
-        #     }
-        # )
         shapes.append({# Unbounded span at 6 <= x <= 8
                 'type': 'rect',
                 # x-reference is assigned to the x-values
@@ -88,7 +72,7 @@ def plot_data_with_anomalies_plotly(data, anomalies, as_var=False):
         )
     return plotly.offline.plot(fig, auto_open=False, output_type='div')
 
-def plot_data_with_anomalies(data, anomalies, as_var=False):
+def plot_data_with_anomalies(data, anomalies):
     """ Plot the data and add anomalies as line on the graph
 
     :argument data: dataframe (same as above)
@@ -107,13 +91,11 @@ def plot_data_with_anomalies(data, anomalies, as_var=False):
                      color='y', alpha=0.5, lw=0)
 
     plt.legend()
-    if not as_var:
-        plt.show()
-        print("""
-        If you are not happy with these anomalies, you can call the method \'get_anomalies\' and
-        specify the function to get anomalies:
-        - method = 'constant' with parameter k (set to 1 by default)
-        - method = 'rolling' with parameters lookback_mean, lookback_std and k (set to 1, 10, 1 by default)
-        - method = 'ewm' with parameters halflife_mean, halflife_std and k(set to 1,10,1 by default) [default method]
-        """)
-    return fig
+    plt.show()
+    print("""
+    If you are not happy with these anomalies, you can call the method \'get_anomalies\' and
+    specify the function to get anomalies:
+    - method = 'constant' with parameter k (set to 1 by default)
+    - method = 'rolling' with parameters lookback_mean, lookback_std and k (set to 1, 10, 1 by default)
+    - method = 'ewm' with parameters halflife_mean, halflife_std and k(set to 1,10,1 by default) [default method]
+    """)

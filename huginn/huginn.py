@@ -57,24 +57,23 @@ class Huginn:
 
 
     def plot_interest(self, plotly=False):
-        """Plot only the interestt the month of the entity or person under study"""
+        """Plot only the interest the month of the entity or person under study"""
         if not plotly:
             plot_data(self.interest)
         else:
             return plot_data_plotly(self.interest)
 
-    def plot_interest_with_anomalies(self, plotly=False, as_var=False):
+    def plot_interest_with_anomalies(self, plotly=False):
         """
         Plot interest by month and the anomalies (as vertical lines)
         """
         self.check_got_anomalies()
         if not plotly:
-            self.anomaly_plot = plot_data_with_anomalies(self.interest, self.anomalies, as_var)
+            plot_data_with_anomalies(self.interest, self.anomalies)
         else:
-            self.anomaly_plot = plot_data_with_anomalies_plotly(self.interest, self.anomalies, as_var)
-            return self.anomaly_plot
+            return plot_data_with_anomalies_plotly(self.interest, self.anomalies)
     
-    def get_info(self, num_links):
+    def get_info(self, num_links='all'):
         self.check_got_anomalies()
         tmp = get_articles_title_text_images_all_dates(self.name, self.anomalies, num_links)
         self.urls = tmp['urls']
