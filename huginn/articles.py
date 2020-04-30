@@ -49,7 +49,7 @@ def get_nyt_url(keyword, date):
     :argument keyword: entity you are interested in
     :argument date: pandas timestemp
 
-    :return: corresponding url as a string
+    :returns: corresponding url as a string
     """
     begin_date = _timestamp_to_string(date - pd.DateOffset(months=1))
     end_date = _timestamp_to_string(date + pd.DateOffset(months=1))
@@ -61,14 +61,14 @@ def get_nyt_url(keyword, date):
         .format(keyword, sections, api_key, begin_date, end_date)
     return url
 
-def get_article_urls(keyword, date, num_links=1):
+def get_article_urls(keyword, date, num_links='all'):
     """ Returns the links to NYT in the month preceding the input date with a keyword input
 
     Note - we search the month before the anomaly date as well
 
     :argument keyword: str keyword to search by
     :argument date: pd.Timestamp containing the date of anomaly, to search the month before
-    :argument num_links: The number of links to return. Default is one.
+    :argument num_links: The number of links to return. Default is all.
 
     :returns a list of links of length num_links (corresponding to articles for ONE anomaly)
     """
@@ -83,7 +83,10 @@ def get_article_urls(keyword, date, num_links=1):
     except KeyError:
         #only keep article (not multimedia content)
         articles = [news['web_url'] for news in r.json()['response']['docs'] if news['document_type'] == 'article']
-        return articles[:num_links]
+        if num_links == 'all':
+            return articles
+        else:
+            return articles[:num_links]
 
 def get_article_title_text_images(article_url):
     """Get the images, title and text of ONE article from its url
@@ -99,22 +102,31 @@ def get_article_title_text_images(article_url):
         for link in soup.find_all('img'):
             imgSrc = link.get('src')
             image_links.append(imgSrc)
+
         article_html_content = soup.find('html').find('body').find('article')
+
         title = article_html_content.find('header').find('h1').get_text()
-        paragraphs = article_html_content.find('section', attrs = {'name':'articleBody'}).find_all('p')
+        section = article_html_content.find('section')
+        div = article_html_content.find('div', {"class": "entry-content"})
+
+        if section: #NYT article
+            paragraphs = section.find_all('p')
+        else: #NYT blog article
+            paragraphs = div.find_all('p')
+
         text = ' '.join([title+'.'] + [p.get_text() for p in paragraphs])
         return image_links, title, text
     except:
         return None, None, None
 
-def get_articles_title_text_images(keyword, date, num_links = 1):
+def get_articles_title_text_images(keyword, date, num_links = 'all'):
     """Get the images, title and text for ALL articles related to keyword at a specific date
 
     :argument keyword: str keyword (entity)
     :argument date: pandas datetime (anomaly date)
-    :argument num_links: number of links (articles) to consider
+    :argument num_links: number of links (articles) to consider, default to all
 
-    :returns a dictionary (keys are images, titles and texts), values are a list of str, corresponding to the images, title or text of each article
+    :returns a dictionary (keys are urls, images, titles and texts), values are a list of str, corresponding to the urls, images, title or text of each article and an int (S), the number of articles that could have been scrapped
     """
     articles_url = get_article_urls(keyword, date, num_links=num_links)
     results = {}
@@ -129,27 +141,23 @@ def get_articles_title_text_images(keyword, date, num_links = 1):
             results['images'].append(images)
     return S, results
 
-def get_articles_title_text_images_all_dates(keyword, dates, num_links = 1):
-    """Get ALL articles title and text for ALL dates (anomalies) related to keyword (entity or person)
+def get_articles_title_text_images_all_dates(keyword, dates, num_links = 'all'):
+    """Get ALL articles urls, images, title and text for ALL dates (anomalies) related to keyword (entity or person)
 
     :argument keyword: str keyword (entity or person)
     :argument dates: DatetimeIndex of pandas datetime (dtype=datetime64[ns])
-    :argument num_links: number of links (articles) to consider
+    :argument num_links: number of links (articles) to consider, default to all
 
-    :returns a dictionary (keys are titles and texts) of dictionary whose keys are dates (anomalies) and values are lists containing title or text of articles
+    :returns a dictionary (keys are titles and texts) of dictionary whose keys are dates (anomalies) and values are lists containing urls, titles, images or text of articles
     """
     results = {'urls': {}, 'titles':{}, 'texts':{}, 'images':{}}
-    total = 0
-    N = 0
-    for date in dates:
+    for i,date in enumerate(dates):
         S, tmp = get_articles_title_text_images(keyword, date, num_links)
         results['urls'][date] = tmp['urls']
         results['titles'][date] = tmp['titles']
         results['texts'][date] = tmp['texts']
         results['images'][date] = tmp['images']
-        total +=S
-        N+=len(tmp['urls'])
-    print('You asked for ' + str(len(dates)*num_links) + ' articles.')
-    print(str(N) + ' articles about ' + keyword + ' were found.')
-    print(str(int(total/N*100))+ '% of found articles could have been scrapped')
+        N=len(tmp['urls'])
+        print('anomaly n°{0}: {1} articles were found and {2}% could have been scrapped'.format(
+            str(i+1), str(N), str(int(S/N*100))))
     return results
