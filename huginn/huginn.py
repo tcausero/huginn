@@ -1,6 +1,6 @@
 import numpy as np
 
-from .interest import get_interest
+from .interest import get_interest, get_mid
 from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
 from .articles import get_articles_title_text_images_all_dates
@@ -9,9 +9,12 @@ from ._gpt2 import run_gpt2
 from ._summarizer import run_summary
 
 class Huginn:
-    def __init__(self, key_word, mid=None):
-        self.name = key_word
-        self.mid = mid
+    def __init__(self, keyword):
+        """Create a Huginn object
+        :argument keyword: person or entity you would like information about
+        """
+        self.name = keyword
+        self.mid = get_mid(self.name)
         self.interest = get_interest(self.name, self.mid)
 
     def get_anomalies(self, method="ewm", **kwargs):

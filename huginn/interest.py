@@ -11,11 +11,6 @@ def get_pytrend():
                         tz=360) #timezone (US CST is 360)
     return pytrends
 
-def get_keyword():
-    """Ask for the keyword (entity or person) you would like some information about"""
-    keyword = input('keyword: ')
-    return keyword
-
 def get_mid(keyword):
     """Ask for the mid your are interested in. Pytrends has a very useful method '.suggestions' which enables to
     specify your research (Ex: Apple could be a company or a fruit)
