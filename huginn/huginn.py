@@ -5,7 +5,7 @@ from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
 from .articles import get_articles_title_text_images_all_dates
 from .LDA import run_lda
-from .summarizer import run_gpt2, run_summary
+from .summarizer import run_summary
 
 class Huginn:
     def __init__(self, keyword):
@@ -88,15 +88,11 @@ class Huginn:
         self.check_got_articles()
         self.lda_output = run_lda(self.articles, n_components=n_components, n_words = n_words)
 
-    #def gpt2(self):
-    #    self.check_got_anomalies()
-    #    self.check_got_articles()
-    #    self.check_got_ldamodel()
-    #    self.gpt2_output = run_gpt2(self.gpt2_input)
-
-    #def get_summary(self):
-    #    self.check_got_anomalies()
-    #    self.check_got_articles()
-    #    self.check_got_ldamodel()
-    #    self.summary = run_summary(self.gpt2_input)
-
+    def get_summary(self):
+        self.check_got_anomalies()
+        self.check_got_articles()
+        self.check_got_ldamodel()
+        for date in self.anomalies.keys():
+            topic = int(input('Which topic are you interested in?'))
+            text_to_summarize = 
+            self.summary = run_summary(self.gpt2_input, max_lentgh = 100)
