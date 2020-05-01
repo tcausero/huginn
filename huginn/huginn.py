@@ -1,17 +1,19 @@
 import numpy as np
 
-from .interest import get_interest
+from .interest import get_interest, get_mid
 from .anomalies import constant_sd, rolling_std, ewm_std
 from .visualize import plot_data_plotly, plot_data, plot_data_with_anomalies, plot_data_with_anomalies_plotly
 from .articles import get_articles_title_text_images_all_dates
-from ._lda import tokenize, get_lemma, prepare_text_for_lda, retrieve_tokens, set_dict, set_corpus, run_lda
-from ._gpt2 import run_gpt2
-from ._summarizer import run_summary
+from .LDA import run_lda
+from .summarizer import lda_filter_articles_anomalies, get_summaries_by_topic
 
 class Huginn:
-    def __init__(self, key_word, mid=None):
-        self.name = key_word
-        self.mid = mid
+    def __init__(self, keyword):
+        """Create a Huginn object
+        :argument keyword: person or entity you would like information about
+        """
+        self.name = keyword
+        self.mid = get_mid(self.name)
         self.interest = get_interest(self.name, self.mid)
 
     def get_anomalies(self, method="ewm", **kwargs):
@@ -36,42 +38,37 @@ class Huginn:
     def check_got_anomalies(self):
         """Method to check if get_anomalies has been called, used primarily as a check in later functions"""
         if not hasattr(self, 'anomalies'):
-            raise AttributeError('Huginn has not gotten anomalies yet. Use \'get_anomalies\' before using '
-                                 'Huginn')
+            raise AttributeError('Huginn has not gotten anomalies yet. Use \'get_anomalies\'.')
 
 
     def check_got_articles(self):
         """Method to check if get_articles() has been called, used primarily as a check in later functions"""
         if not hasattr(self, 'articles'):
-            raise AttributeError('Huginn has not gotten article texts yet. Use \'get_articles\' before using '
-                                 'Huginn')
+            raise AttributeError('Huginn has not gotten article texts yet. Use \'get_info\'.')
 
     def check_got_ldamodel(self):
         """Method to check if model_lda() has been called, used primarily as a check in later functions"""
-        if not hasattr(self, 'ldamodel'):
-            raise AttributeError('Huginn has not gotten article texts yet. Use \'model_lda\' before using '
-                                 'Huginn')
-
+        if not hasattr(self, 'lda_output'):
+            raise AttributeError('Huginn has not run LDA yet. Use \'model_lda\' first.')
 
     def plot_interest(self, plotly=False):
-        """Plot only the interestt the month of the entity or person under study"""
+        """Plot only the interest the month of the entity or person under study"""
         if not plotly:
             plot_data(self.interest)
         else:
             return plot_data_plotly(self.interest)
 
-    def plot_interest_with_anomalies(self, plotly=False, as_var=False):
+    def plot_interest_with_anomalies(self, plotly=False):
         """
         Plot interest by month and the anomalies (as vertical lines)
         """
         self.check_got_anomalies()
         if not plotly:
-            self.anomaly_plot = plot_data_with_anomalies(self.interest, self.anomalies, as_var)
+            plot_data_with_anomalies(self.interest, self.anomalies)
         else:
-            self.anomaly_plot = plot_data_with_anomalies_plotly(self.interest, self.anomalies, as_var)
-            return self.anomaly_plot
+            return plot_data_with_anomalies_plotly(self.interest, self.anomalies)
     
-    def get_info(self, num_links):
+    def get_info(self, num_links='all'):
         self.check_got_anomalies()
         tmp = get_articles_title_text_images_all_dates(self.name, self.anomalies, num_links)
         self.urls = tmp['urls']
@@ -79,28 +76,25 @@ class Huginn:
         self.articles = tmp['texts']
         self.images = tmp['images']
 
-    def model_lda(self, viz=True):
+    def model_lda(self, n_components = 2):
         """Must have run get_anomalies() and get_title_text() to have requisite articles in session
            prior to running LDA on the object
         """
-
         self.check_got_anomalies()
         self.check_got_articles()
-        article_list = [item for sublist in list(self.articles.values()) for item in sublist if len(item) > 10]
-        self.text_data = retrieve_tokens(article_list)
-        self.dictionary = set_dict(self.text_data)
-        self.corpus = set_corpus(self.text_data, self.dictionary)
-        self.ldamodel, self.dom_topic, self.gpt2_input = run_lda(self.corpus, self.dictionary, article_list)
+        self.lda_output = run_lda(self.articles, n_components=n_components)
 
-    def gpt2(self):
-        self.check_got_anomalies()
-        self.check_got_articles()
-        self.check_got_ldamodel()
-        self.gpt2_output = run_gpt2(self.gpt2_input)
-
-    def get_summary(self):
+    def get_summary(self, mode='summary', max_length = 100):
+        """Compute the summary for each anoamly date
+        :argument mode: str, could be summary or gpt2 (summarizer to use)
+        :argument max_length: int, max length of the summary
+        :returns a summary (str) for each anomaly date, for each topic (dic of dic)
+        """
         self.check_got_anomalies()
         self.check_got_articles()
         self.check_got_ldamodel()
-        self.summary = run_summary(self.gpt2_input)
-
+        
+        lda_filter_articles = lda_filter_articles_anomalies(self.lda_output, self.articles)
+        self.summary_by_anomalies_by_topics = get_summaries_by_topic(lda_filter_articles, max_length, mode = mode)
+        
+        return self.summary_by_anomalies_by_topics

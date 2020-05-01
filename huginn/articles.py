@@ -51,8 +51,8 @@ def get_nyt_url(keyword, date):
 
     :returns: corresponding url as a string
     """
-    begin_date = _timestamp_to_string(date - pd.DateOffset(months=1))
-    end_date = _timestamp_to_string(date + pd.DateOffset(months=1))
+    begin_date = _timestamp_to_string(date - pd.DateOffset(days=2))
+    end_date = _timestamp_to_string(date + pd.DateOffset(months = 1) + pd.DateOffset(days=2))
     start_url = 'https://api.nytimes.com/svc/search/v2/articlesearch.json?'
     api_key = get_api_key()
     sections = _get_sections()
@@ -158,6 +158,6 @@ def get_articles_title_text_images_all_dates(keyword, dates, num_links = 'all'):
         results['texts'][date] = tmp['texts']
         results['images'][date] = tmp['images']
         N=len(tmp['urls'])
-        print('anomaly n°{0}: {1} articles were found and {2}% could have been scrapped'.format(
+        print('anomaly n°{0}: {1} articles were found and {2}% were retrieved'.format(
             str(i+1), str(N), str(int(S/N*100))))
     return results
