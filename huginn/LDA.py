@@ -57,39 +57,17 @@ def preprocess(sentences, nlp):
     data = vectorize(vectorizer, sentences) #remove stopwords, lowercase, num_chars > 3
     return data, vectorizer
 
-def show_topics(vectorizer, lda_model, n_words):
-    """Show top n keywords for each topic
-    :argument vectorizer: vectorizer
-    :argument lda_model: lda model
-    :argument n_words: int (number of top words for each topic)
-    :returns dataframe (index are topics, columns are top keywords)
-    """
-    keywords = np.array(vectorizer.get_feature_names())
-    topic_keywords = []
-    for topic_weights in lda_model.components_:
-        top_keyword_locs = (-topic_weights).argsort()[:n_words]
-        topic_keywords.append(keywords.take(top_keyword_locs))
-        
-    # Topic - Keywords Dataframe
-    df_topic_keywords = pd.DataFrame(topic_keywords)
-    df_topic_keywords.columns = ['Word '+str(i) for i in range(df_topic_keywords.shape[1])]
-    df_topic_keywords.index = ['Topic '+str(i) for i in range(df_topic_keywords.shape[0])]
-    return df_topic_keywords
-
-def run_lda_once(sentences, nlp, n_components, n_words):
+def run_lda_once(sentences, nlp, n_components):
     """Run LDA algorithm for only one anomaly date
     :argument n_components: int (number of topics, set to 2 by default: out of scope and in the scope)
     :argument sentences: list of str (sentences)
     :argument nlp: spacy language model
-    :argument n_words: int (number of top words to keep for each topic)
-    :returns 3 dataframes: - Docs as index and (%) topics as columns (plus dominant topic for each document)
-                           - Topics as index and number of documents (per dominant topics) as columns
-                           - Topics as index and top words in the columns
+    :returns a dictionary: keys are topics and values are ids of articles to keep for each topic (for each topic t, only keep articles whose dominant topic is t)
     """
     #preprocess sentences
     preprocess_data, vectorizer = preprocess(sentences, nlp)
     
-    lda = LatentDirichletAllocation(n_components = n_components)
+    lda = LatentDirichletAllocation(n_components = n_components, random_state=230, max_iter=20)
     lda.fit(preprocess_data) #train LDA
     #return partition of each topic for each document (dense array of size n_doc * n_components)
     lda_output = lda.transform(preprocess_data) 
@@ -102,23 +80,19 @@ def run_lda_once(sentences, nlp, n_components, n_words):
     # Get dominant topic for each document
     dominant_topic = np.argmax(df_document_topic.values, axis=1)
     df_document_topic['dominant_topic'] = dominant_topic
-    df_document_topic = df_document_topic.round(2)
     
-    #Get number of documents per dominant topic
-    df_topic_distribution = df_document_topic['dominant_topic'].value_counts().reset_index()
-    df_topic_distribution.columns = ['Topic Num', 'Num Documents']
-    df_topic_distribution.set_index('Topic Num', inplace = True)
+    ids_topic = {} #create number of topics set of articles (this is a partition of the set of all articles)
+    topics = list(df_document_topic.groupby('dominant_topic').count()['Topic0'].sort_values(ascending = False).index) #sort topics by dominance across documents
+    for topic in topics:
+        ids_topic[topic] = list(map(lambda x: int(x[3:]),
+                          list(df_document_topic[df_document_topic['dominant_topic']==topic].index)))
     
-    # Topic-Keyword Matrix
-    df_topic_keywords = show_topics(vectorizer, lda, n_words=n_words)
-    
-    return [df_document_topic, df_topic_distribution, df_topic_keywords]
+    return ids_topic
 
-def run_lda(dic_sentences, n_components=2, n_words = 10):
+def run_lda(dic_sentences, n_components):
     """Run LDA algorithm
     :argument dic_sentences: dic, keys are date and values are list of sentences
     :argument n_components: int (number of topics, set to 2 by default: out of scope and in the scope)
-    :argument n_words: int (number of top words to keep for each topic)
     :returns a dic - keys are dates, values are a list of 3 dataframes (see run_lda_once for more information)
     """
     # Initialize spacy 'en' model, keeping only tagger component (for efficiency)
@@ -130,5 +104,5 @@ def run_lda(dic_sentences, n_components=2, n_words = 10):
     dates = dic_sentences.keys()
     dic_info = {}
     for date in dates:
-        dic_info[date] = run_lda_once(dic_sentences[date], nlp, n_components=n_components, n_words = n_words)
+        dic_info[date] = run_lda_once(dic_sentences[date], nlp, n_components=n_components)
     return dic_info
