@@ -84,9 +84,8 @@ class Huginn:
         self.check_got_articles()
         self.lda_output = run_lda(self.articles, n_components=n_components)
 
-    def get_summary(self, mode='summary', max_length = 100):
+    def get_summary(self, max_length = 100):
         """Compute the summary for each anoamly date
-        :argument mode: str, could be summary or gpt2 (summarizer to use)
         :argument max_length: int, max length of the summary
         :returns a summary (str) for each anomaly date, for each topic (dic of dic)
         """
@@ -95,6 +94,6 @@ class Huginn:
         self.check_got_ldamodel()
         
         lda_filter_articles = lda_filter_articles_anomalies(self.lda_output, self.articles)
-        self.summary_by_anomalies_by_topics = get_summaries_by_topic(lda_filter_articles, max_length, mode = mode)
+        self.summary_by_anomalies_by_topics = get_summaries_by_topic(lda_filter_articles, max_length)
         
         return self.summary_by_anomalies_by_topics
