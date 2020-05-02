@@ -27,16 +27,16 @@ def lda_filter_articles_anomalies(dic_ids, dic_articles):
         preprocessed_LDA_articles[date] = lda_filter_articles(dic_ids[date], dic_articles[date])
     return preprocessed_LDA_articles
 
-def run_summary(sentence, max_length):
+def run_summary(sentence, min_length, max_length):
     """Summarize sentence with a maximum of max_length characters
     :argument sentence: str (sentence to summarize)
     :argument max_length: maximum length of the output
     :returns str: summary of the sentence
     """
     summarizer = pipeline("summarization")
-    return summarizer(sentence, max_length=max_length)
+    return summarizer(sentence, min_length=min_length, max_length=max_length)[0]['summary_text']
 
-def get_summaries_by_topic(dic_anoamlies_topic_articles, max_length):
+def get_summaries_by_topic(dic_anoamlies_topic_articles, min_length, max_length):
     """Compute the summary for each anoamly date
     Articles are supposed to be already filtered by LDA
     :argument dic_anoamlies_topic_articles: dic, keys are dates, values are dic (keys are topics, values are sentences (str))
@@ -49,5 +49,5 @@ def get_summaries_by_topic(dic_anoamlies_topic_articles, max_length):
         summaries_by_topic[date.strftime('%m-%Y')] = {}
         for topic in dic_anoamlies_topic_articles[date].keys():
             summaries_by_topic[date.strftime('%m-%Y')][topic] = run_summary(dic_anoamlies_topic_articles[date][topic], 
-                                                              max_length)[0]['summary_text']
+                                                              min_length, max_length)
     return summaries_by_topic
