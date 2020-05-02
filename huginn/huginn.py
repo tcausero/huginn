@@ -13,8 +13,8 @@ class Huginn:
         :argument keyword: person or entity you would like information about
         """
         self.name = keyword
-        self.mid = get_mid(self.name)
-        self.interest = get_interest(self.name, self.mid)
+        self.__mid = get_mid(self.name) #private attribute
+        self.interest = get_interest(self.name, self.__mid)
 
     def get_anomalies(self, method="ewm", **kwargs):
         """Get anomalies under method assumption (by default ewm)
@@ -35,21 +35,11 @@ class Huginn:
         self.anomalies_formatted = np.array(self.anomalies, dtype='datetime64[D]')
         return self.anomalies
 
-    def check_got_anomalies(self):
+    #private method
+    def __check_got_anomalies(self):
         """Method to check if get_anomalies has been called, used primarily as a check in later functions"""
         if not hasattr(self, 'anomalies'):
             raise AttributeError('Huginn has not gotten anomalies yet. Use \'get_anomalies\'.')
-
-
-    def check_got_articles(self):
-        """Method to check if get_articles() has been called, used primarily as a check in later functions"""
-        if not hasattr(self, 'articles'):
-            raise AttributeError('Huginn has not gotten article texts yet. Use \'get_info\'.')
-
-    def check_got_ldamodel(self):
-        """Method to check if model_lda() has been called, used primarily as a check in later functions"""
-        if not hasattr(self, 'lda_output'):
-            raise AttributeError('Huginn has not run LDA yet. Use \'model_lda\' first.')
 
     def plot_interest(self, plotly=False):
         """Plot only the interest the month of the entity or person under study"""
@@ -62,38 +52,48 @@ class Huginn:
         """
         Plot interest by month and the anomalies (as vertical lines)
         """
-        self.check_got_anomalies()
+        self.__check_got_anomalies()
         if not plotly:
             plot_data_with_anomalies(self.interest, self.anomalies)
         else:
             return plot_data_with_anomalies_plotly(self.interest, self.anomalies)
     
-    def get_info(self, num_links='all'):
-        self.check_got_anomalies()
+    def get_articles_info(self, num_links):
+        """Get all information about articles (images, urls, content, titles) for each anomaly
+        :argument num_links: number of links to keep for each anomaly ('all' by default). The maximum number of articles is 10 due to API quota limit.
+        :returns dictionary, keys are anomaly dates and values are list of images, urls, contents or titles
+        """
+        self.__check_got_anomalies() #check if we have anomalies
         tmp = get_articles_title_text_images_all_dates(self.name, self.anomalies, num_links)
         self.urls = tmp['urls']
         self.titles = tmp['titles']
         self.articles = tmp['texts']
         self.images = tmp['images']
 
-    def model_lda(self, n_components = 2):
+    #private method
+    def __get_topics_with_lda(self, n_components):
         """Must have run get_anomalies() and get_title_text() to have requisite articles in session
            prior to running LDA on the object
+        Get distribution of articles through topics for each anomaly date
+        :argument n_components: number of topics for LDA, set to 2 by default (out of scope and in focus area).
+        :returns a dictionary, keys are dates, values are dictionary (keys are topics and values are list of articles)
         """
-        self.check_got_anomalies()
-        self.check_got_articles()
-        self.lda_output = run_lda(self.articles, n_components=n_components)
+        self.__lda_output = run_lda(self.articles, n_components=n_components) #private attributes
 
-    def get_summary(self, max_length = 100):
+    def get_articles_info_and_summary_after_LDA(self, num_links = 'all', n_components = 2, max_length = 100):
         """Compute the summary for each anoamly date
+        ONCE THIS METHOD HAS BEEN CALLED, YOU HAVE ACCESS TO ALL ATTRIBUTES OF THE CLASS HUGGIN:
+        SELF.ARTICLES, SELF.TITLES, SELF.IMAGES, SELF.SUMMARY_BY_ANOMALIES_BY_TOPICS
         :argument max_length: int, max length of the summary
+        :argument num_links: int or 'all', number of articles for each anomaly
+        :argument n_components: number of topics for LDA
         :returns a summary (str) for each anomaly date, for each topic (dic of dic)
         """
-        self.check_got_anomalies()
-        self.check_got_articles()
-        self.check_got_ldamodel()
+        self.__check_got_anomalies()
+        self.get_articles_info(num_links = num_links)
+        self.__get_topics_with_lda(n_components = n_components)
         
-        lda_filter_articles = lda_filter_articles_anomalies(self.lda_output, self.articles)
+        lda_filter_articles = lda_filter_articles_anomalies(self.__lda_output, self.articles)
         self.summary_by_anomalies_by_topics = get_summaries_by_topic(lda_filter_articles, max_length)
         
         return self.summary_by_anomalies_by_topics
