@@ -22,7 +22,6 @@ dataclasses==0.7
 decorator==4.4.2
 defusedxml==0.6.0
 docutils==0.15.2
-en-core-web-sm==2.2.5
 entrypoints==0.3
 filelock==3.0.12
 gast==0.2.2
@@ -55,9 +54,6 @@ Markdown==3.2.1
 MarkupSafe==1.1.1
 matplotlib==3.2.1
 mistune==0.8.4
-mkl-fft==1.0.15
-mkl-random==1.1.0
-mkl-service==2.3.0
 murmurhash==1.0.2
 nbconvert==5.6.1
 nbformat==5.0.6
