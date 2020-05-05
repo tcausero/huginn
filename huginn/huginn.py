@@ -94,7 +94,7 @@ class Huginn:
         self.__check_got_articles()
         self.__lda_output = run_lda(self.articles, n_components=n_components) #private attributes
 
-    def get_articles_info_and_summary_after_LDA(self, n_components = 2, min_length = 50, max_length = 150):
+    def get_local_summaries(self, n_components = 2, min_length = 50, max_length = 150):
         """Compute the summary for each anoamly date
         :argument max_length: int, max length of the summary
         :argument n_components: number of topics for LDA
