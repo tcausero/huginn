@@ -32,6 +32,6 @@ setup(name='huginn',
             'spacy',
             'nltk',
             'torch',
-            'transformers==2.4.1'
+            'transformers'
        ],
       zip_safe=False)
