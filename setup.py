@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='huginn',
-      version='0.1.1',
+      version='0.1.2',
       description='Tools to Detect Anomalous Events and News Related to Entities',
       long_description=long_description,
       long_description_content_type="text/markdown",
@@ -32,6 +32,6 @@ setup(name='huginn',
             'spacy',
             'nltk',
             'torch',
-            'transformers==2.4.1'
+            'transformers'
        ],
       zip_safe=False)
