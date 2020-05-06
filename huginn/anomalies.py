@@ -36,8 +36,9 @@ def rolling_std(data, lookback_mean = 1, lookback_std = 10, k = 1):
     """
     mean = data.rolling(lookback_mean).mean().shift(1)
     std = data.rolling(lookback_std).std().shift(1)
-    tmp = data-mean-k*std
-    return tmp[tmp.iloc[:,0]>0].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
+    std = std[std>0]
+    tmp = (data-mean)/(k*std)
+    return tmp[tmp.iloc[:,0]>1].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
 
 def ewm_std(data, halflife_mean=1, halflife_std=10, k = 1): 
     """method to get anomalies as dates (DatetimeIndex) (dtype=datetime64[ns])
@@ -55,5 +56,6 @@ def ewm_std(data, halflife_mean=1, halflife_std=10, k = 1):
     """
     mean = data.ewm(halflife = halflife_mean).mean().shift(1)
     std = data.ewm(halflife = halflife_std).std().shift(1)
-    tmp = data-mean-k*std
-    return tmp[tmp.iloc[:,0]>0].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
+    std = std[std>0]
+    tmp = (data-mean)/(k*std)
+    return tmp[tmp.iloc[:,0]>1].sort_values(by = tmp.columns[0], ascending = False)[0:10].index.sort_values()
