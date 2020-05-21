@@ -21,7 +21,7 @@ def _timestamp_to_string(timestamp):
 
 def _get_sections():
     """ Get the desired sections to search from a config file"""
-    file_path = Path(os.path.dirname(os.path.abspath(__file__))).parent / 'config' / 'sections.txt'
+    file_path = Path(os.path.dirname(os.path.abspath(__file__))) / 'config' / 'sections.txt'
     try:
         with open(file_path, 'r') as f:
             sections = f.readlines()
