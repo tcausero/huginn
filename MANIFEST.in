@@ -1,2 +1,2 @@
-include config/*
+include huginn/config/*
 include img/*
